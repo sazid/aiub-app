@@ -154,11 +154,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_portal) {
-            // Handle the camera action
+            webView.loadUrl("http://www.portal.aiub.edu/");
         } else if (id == R.id.nav_home) {
-
+            webView.loadUrl("http://www.aiub.edu/");
         } else if (id == R.id.nav_notice) {
-
+            webView.loadUrl("http://www.aiub.edu/category/notices");
         } else if (id == R.id.nav_clubs) {
 
         } else if (id == R.id.nav_share) {
