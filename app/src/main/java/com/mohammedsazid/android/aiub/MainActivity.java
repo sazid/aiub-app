@@ -28,6 +28,8 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdvancedWebView.Listener {
 
+    public static final String EXTRA_PRELOAD_URL = "EXTRA_PRELOAD_URL";
+
     private Toolbar toolbar;
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -68,7 +70,14 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        webView.loadUrl("http://portal.aiub.edu/");
+        // check for any new notice
+        CheckNoticeService.startActionCheckNotice(this);
+
+        if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
+            webView.loadUrl("http://portal.aiub.edu/");
+        } else {
+            webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
+        }
     }
 
     private void bindViews() {
@@ -127,6 +136,10 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         webView.onResume();
+
+        if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) != null) {
+            webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
+        }
     }
 
     @Override
