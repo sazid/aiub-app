@@ -112,9 +112,7 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (!webView.onBackPressed()) {
-            return;
-        } else {
+        } else if (webView.onBackPressed()) {
             super.onBackPressed();
         }
     }
@@ -212,7 +210,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    class CustomWebChromeClient extends WebChromeClient {
+    private class CustomWebChromeClient extends WebChromeClient {
 
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
@@ -234,7 +232,10 @@ public class MainActivity extends AppCompatActivity
             setTitle(title);
 
             Uri uri = Uri.parse(view.getUrl());
-            getSupportActionBar().setSubtitle(uri.getAuthority());
+            try {
+                getSupportActionBar().setSubtitle(uri.getAuthority());
+            } catch (Exception ignored) {
+            }
         }
 
         @Override
