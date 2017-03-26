@@ -1,9 +1,14 @@
 package com.mohammedsazid.android.aiub;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,6 +21,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -30,6 +36,8 @@ public class MainActivity extends AppCompatActivity
     private AdvancedWebView webView;
     private CustomWebChromeClient webChromeClient;
 
+    private boolean isLoading = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +47,19 @@ public class MainActivity extends AppCompatActivity
         setupWebView();
 
         setSupportActionBar(toolbar);
+        toolbar.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(webView.getUrl(), webView.getUrl());
+                clipboard.setPrimaryClip(clip);
+
+                Snackbar.make(v,
+                        "URL copied into clipboard",
+                        Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+        });
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -124,6 +145,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem refreshMenuItem = menu.findItem(R.id.action_refresh);
+
+        if (isLoading) {
+            refreshMenuItem.setTitle("Stop");
+            refreshMenuItem.setIcon(R.drawable.ic_stop);
+        } else {
+            refreshMenuItem.setTitle("Refresh");
+            refreshMenuItem.setIcon(R.drawable.ic_refresh);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -135,8 +171,12 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_settings:
                 return true;
             case R.id.action_refresh:
-                webView.stopLoading();
-                webView.reload();
+                if (!isLoading) {
+                    webView.stopLoading();
+                    webView.reload();
+                } else {
+                    webView.stopLoading();
+                }
                 return true;
             case R.id.action_forward:
                 webView.stopLoading();
@@ -154,11 +194,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_portal) {
-            webView.loadUrl("http://www.portal.aiub.edu/");
+            webView.loadUrl("http://portal.aiub.edu/");
         } else if (id == R.id.nav_home) {
-            webView.loadUrl("http://www.aiub.edu/");
+            webView.loadUrl("http://aiub.edu/");
         } else if (id == R.id.nav_notice) {
-            webView.loadUrl("http://www.aiub.edu/category/notices");
+            webView.loadUrl("http://aiub.edu/category/notices");
         } else if (id == R.id.nav_clubs) {
 
         } else if (id == R.id.nav_share) {
@@ -178,10 +218,13 @@ public class MainActivity extends AppCompatActivity
         public void onProgressChanged(WebView view, int newProgress) {
             if (newProgress == 100) {
                 progressBar.setVisibility(View.INVISIBLE);
+                isLoading = false;
             } else {
                 progressBar.setVisibility(View.VISIBLE);
+                isLoading = true;
             }
 
+            supportInvalidateOptionsMenu();
             super.onProgressChanged(view, newProgress);
         }
 
@@ -189,6 +232,9 @@ public class MainActivity extends AppCompatActivity
         public void onReceivedTitle(WebView view, String title) {
             super.onReceivedTitle(view, title);
             setTitle(title);
+
+            Uri uri = Uri.parse(view.getUrl());
+            getSupportActionBar().setSubtitle(uri.getAuthority());
         }
 
         @Override
@@ -226,7 +272,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
-
+        if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
+            Toast.makeText(this, "Downloading file…", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to download file", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

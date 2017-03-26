@@ -368,6 +368,7 @@ public class AdvancedWebView extends WebView {
 
     public boolean onBackPressed() {
         if (canGoBack()) {
+            stopLoading();
             goBack();
             return false;
         } else {
