@@ -88,8 +88,6 @@ public class CheckNoticeService extends IntentService {
             prefs.edit()
                     .putString(PREF_NOTICES_KEY, sb.toString())
                     .apply();
-
-            Log.d("HTML", sb.toString());
         } catch (IOException e) {
             // try again after 10 minutes
 //            scheduleNewCheck(10);
