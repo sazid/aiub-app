@@ -191,8 +191,6 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         switch (id) {
-            case R.id.action_settings:
-                return true;
             case R.id.action_refresh:
                 if (!isLoading) {
                     webView.stopLoading();
@@ -223,11 +221,13 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_notice) {
             webView.loadUrl("http://aiub.edu/category/notices");
         } else if (id == R.id.nav_clubs) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            Snackbar.make(navigationView,
+                    "Not available yet",
+                    Snackbar.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_academic_calendar) {
+            webView.loadUrl("http://aiub.edu/academics/calendar/");
+        } else if (id == R.id.nav_news) {
+            webView.loadUrl("http://aiub.edu/category/news-events");
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

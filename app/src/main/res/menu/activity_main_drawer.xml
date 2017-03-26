@@ -19,19 +19,15 @@
             android:id="@+id/nav_clubs"
             android:icon="@drawable/ic_clubs"
             android:title="Clubs" />
+
+        <item
+            android:id="@+id/nav_news"
+            android:icon="@drawable/ic_event"
+            android:title="News and Events" />
+
+        <item
+            android:id="@+id/nav_academic_calendar"
+            android:icon="@drawable/ic_calendar"
+            android:title="Academic Calendar" />
     </group>
-
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
-
 </menu>
