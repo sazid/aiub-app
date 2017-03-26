@@ -30,6 +30,6 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="17-33330-1" />
+        android:text="https://github.com/sazid/aiub-app" />
 
 </LinearLayout>
