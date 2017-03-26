@@ -108,7 +108,7 @@ public class CheckNoticeService extends IntentService {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + 1000 * 60,
+                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
                     pi);
         } else {
             alarmManager.set(AlarmManager.ELAPSED_REALTIME,
