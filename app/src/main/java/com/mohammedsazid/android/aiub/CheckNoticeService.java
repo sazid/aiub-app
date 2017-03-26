@@ -99,12 +99,18 @@ public class CheckNoticeService extends IntentService {
 
     private void scheduleNewCheck(long minutes) {
         long deferTime = TimeUnit.MINUTES.toMillis(minutes);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        Intent intent = new Intent(this, CheckNoticeService.class);
+        Intent intent = new Intent();
+        intent.setClass(this, CheckNoticeService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
 
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
+
+        // cancel any previous alarm
+        alarmManager.cancel(pi);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
