@@ -14,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -137,8 +138,19 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         webView.onResume();
 
-        if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) != null) {
+        if (!TextUtils.isEmpty(getIntent().getStringExtra(EXTRA_PRELOAD_URL))) {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
+            getIntent().putExtra(EXTRA_PRELOAD_URL, "");
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent != null && !TextUtils.isEmpty(
+                intent.getStringExtra(EXTRA_PRELOAD_URL))) {
+            webView.loadUrl(intent.getStringExtra(EXTRA_PRELOAD_URL));
+            intent.putExtra(EXTRA_PRELOAD_URL, "");
         }
     }
 
