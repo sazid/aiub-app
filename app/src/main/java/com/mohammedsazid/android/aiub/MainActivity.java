@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdvancedWebView.Listener {
 
     public static final String EXTRA_PRELOAD_URL = "EXTRA_PRELOAD_URL";
+    public static final String WRONG_DETAILS_MSG = "Wrong username/password!";
 
     private Toolbar toolbar;
     private NavigationView navigationView;
@@ -134,10 +136,11 @@ public class MainActivity extends AppCompatActivity
                     String FIELD_LOGIN_BUTTON_ID = "login";
 
                     String jsScript =
-                            "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
+                            "if (document.getElementsByClassName('text-danger').length !== 0) { window.alert('" + WRONG_DETAILS_MSG + "'); } else {" +
+                                    "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
                                     "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
                                     "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
-                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();";
+                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click(); }";
 
                     // execute the script (click the login button automatically);
                     view.loadUrl("javascript: {" + jsScript + "};");
@@ -291,6 +294,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class CustomWebChromeClient extends WebChromeClient {
+
+        @Override
+        public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+            if (message.contentEquals(WRONG_DETAILS_MSG)) {
+                Toast.makeText(MainActivity.this,
+                        WRONG_DETAILS_MSG, Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                finish();
+                return true;
+            }
+
+            return super.onJsAlert(view, url, message, result);
+        }
 
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
