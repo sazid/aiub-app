@@ -26,6 +26,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -96,6 +97,10 @@ public class MainActivity extends AppCompatActivity
         } else {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
         }
+
+        TextView navUsername = (TextView) navigationView.getHeaderView(0)
+                .findViewById(R.id.nav_username);
+        navUsername.setText(getUsername());
     }
 
     private void bindViews() {
@@ -272,25 +277,44 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_portal) {
-            webView.loadUrl("http://portal.aiub.edu/");
-        } else if (id == R.id.nav_home) {
-            webView.loadUrl("http://aiub.edu/");
-        } else if (id == R.id.nav_notice) {
-            webView.loadUrl("http://aiub.edu/category/notices");
-        } else if (id == R.id.nav_clubs) {
-            Snackbar.make(navigationView,
-                    "Not available yet",
-                    Snackbar.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_academic_calendar) {
-            webView.loadUrl("http://aiub.edu/academics/calendar/");
-        } else if (id == R.id.nav_news) {
-            webView.loadUrl("http://aiub.edu/category/news-events");
+        switch (id) {
+            case R.id.nav_portal:
+                webView.loadUrl("http://portal.aiub.edu/");
+                break;
+            case R.id.nav_home:
+                webView.loadUrl("http://aiub.edu/");
+                break;
+            case R.id.nav_notice:
+                webView.loadUrl("http://aiub.edu/category/notices");
+                break;
+            case R.id.nav_clubs:
+                Snackbar.make(navigationView,
+                        "Not available yet",
+                        Snackbar.LENGTH_SHORT).show();
+                break;
+            case R.id.nav_academic_calendar:
+                webView.loadUrl("http://aiub.edu/academics/calendar/");
+                break;
+            case R.id.nav_news:
+                webView.loadUrl("http://aiub.edu/category/news-events");
+                break;
+            case R.id.nav_logout:
+                logout();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void logout() {
+        prefs.edit()
+                .remove(getString(R.string.pref_username_key))
+                .remove(getString(R.string.pref_password_key))
+                .apply();
+
+        startActivity(new Intent(this, LoginActivity.class));
     }
 
     private class CustomWebChromeClient extends WebChromeClient {
