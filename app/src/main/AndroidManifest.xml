@@ -41,6 +41,10 @@
             android:name=".NetworkChangeService"
             android:enabled="true"
             android:exported="true" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:label="Login" />
     </application>
 
 </manifest>

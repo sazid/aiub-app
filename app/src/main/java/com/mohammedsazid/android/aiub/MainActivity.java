@@ -4,9 +4,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -37,7 +40,10 @@ public class MainActivity extends AppCompatActivity
     private ProgressBar progressBar;
 
     private AdvancedWebView webView;
+    @SuppressWarnings("FieldCanBeLocal")
     private CustomWebChromeClient webChromeClient;
+
+    private SharedPreferences prefs;
 
     private boolean isLoading = false;
 
@@ -45,6 +51,14 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // check if username or password is stored
+        if (TextUtils.isEmpty(getUsername()) || TextUtils.isEmpty(getPassword())) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         bindViews();
         setupWebView();
@@ -103,9 +117,39 @@ public class MainActivity extends AppCompatActivity
 
         webChromeClient = new CustomWebChromeClient();
         webView.setWebChromeClient(webChromeClient);
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
 
-        webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
+                String username = getUsername();
+                String password = getPassword();
+
+                if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
+                    return;
+
+                if (url.contentEquals("https://portal.aiub.edu/")) {
+                    String FIELD_USERNAME_ID = "username";
+                    String FIELD_PASSWORD_ID = "password";
+                    String FIELD_LOGIN_BUTTON_ID = "login";
+
+                    String jsScript =
+                            "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
+                                    "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
+                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
+                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();";
+
+                    // execute the script (click the login button automatically);
+                    view.loadUrl("javascript: {" + jsScript + "};");
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                        view.evaluateJavascript(jsScript, null);
+//                    } else {
+//                    }
+                }
+            }
+        });
+
+//        webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
 
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setAppCachePath(getCacheDir().getAbsolutePath()
@@ -113,9 +157,19 @@ public class MainActivity extends AppCompatActivity
         webView.setSaveEnabled(true);
     }
 
+    private String getPassword() {
+        return prefs.getString(getString(R.string.pref_password_key), null);
+    }
+
+    private String getUsername() {
+        return prefs.getString(getString(R.string.pref_username_key), null);
+    }
+
     @Override
     protected void onDestroy() {
-        webView.onDestroy();
+        if (webView != null) {
+            webView.onDestroy();
+        }
         super.onDestroy();
     }
 
@@ -211,7 +265,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -259,6 +313,7 @@ public class MainActivity extends AppCompatActivity
 
             Uri uri = Uri.parse(view.getUrl());
             try {
+                //noinspection ConstantConditions
                 getSupportActionBar().setSubtitle(uri.getAuthority());
             } catch (Exception ignored) {
             }
