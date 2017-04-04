@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
         // check for any new notice
         CheckNoticeService.startActionCheckNotice(this);
+        startService(new Intent(this, NetworkChangeService.class));
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
             webView.loadUrl("http://portal.aiub.edu/");
