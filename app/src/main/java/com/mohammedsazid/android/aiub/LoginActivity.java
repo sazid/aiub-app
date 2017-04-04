@@ -1,5 +1,6 @@
 package com.mohammedsazid.android.aiub;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         saveBtn = (Button) findViewById(R.id.save);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void onClick(View v) {
         String usernameStr = username.getText().toString();
@@ -41,7 +43,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(getString(R.string.pref_username_key), usernameStr);
         editor.putString(getString(R.string.pref_password_key), passwordStr);
-        editor.apply();
+        editor.commit();
 
         startActivity(new Intent(this, MainActivity.class));
         finish();
