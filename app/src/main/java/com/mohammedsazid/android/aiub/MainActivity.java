@@ -3,6 +3,7 @@ package com.mohammedsazid.android.aiub;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -301,10 +303,14 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_logout:
                 logout();
                 break;
+            case R.id.nav_about:
+                showHelp();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        drawer.setSelected(false);
         return true;
     }
 
@@ -321,6 +327,35 @@ public class MainActivity extends AppCompatActivity
 
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+
+    public void showHelp() {
+        new AlertDialog.Builder(this)
+                .setTitle("About")
+                .setMessage(getString(R.string.about))
+                .setPositiveButton("CONTACT ME", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        composeEmail(
+                                new String[]{"sazidozon@gmail.com"},
+                                "[AIUB app]: {your subject here}",
+                                ""
+                        );
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    public void composeEmail(String[] addresses, String subject, String body) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:"));
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, body);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
 /*
