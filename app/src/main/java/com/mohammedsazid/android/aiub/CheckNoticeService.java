@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class CheckNoticeService extends IntentService {
     private static final String ACTION_CHECK_FOR_NEW_NOTICE =
             "com.mohammedsazid.android.aiub.action.CHECK_FOR_NEW_NOTICE";
-    private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMillis(6);
+    private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMillis(4);
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
     public CheckNoticeService() {
