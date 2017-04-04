@@ -314,8 +314,32 @@ public class MainActivity extends AppCompatActivity
                 .remove(getString(R.string.pref_password_key))
                 .apply();
 
+        String jsScript = "javascript: {" +
+                "document.location.href = '/Login/Logout';" +
+                "}";
+        webView.loadUrl(jsScript);
+
         startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
+
+/*
+    private void clearCookies() {
+        webView.clearCache(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } else {
+            CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(MainActivity.this);
+            cookieSyncMngr.startSync();
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
+            cookieSyncMngr.stopSync();
+            cookieSyncMngr.sync();
+        }
+    }
+*/
 
     private class CustomWebChromeClient extends WebChromeClient {
 
