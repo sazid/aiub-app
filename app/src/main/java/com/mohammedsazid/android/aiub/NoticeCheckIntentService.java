@@ -50,7 +50,10 @@ public class NoticeCheckIntentService extends IntentService {
 
     private void parseNoticeHTML(String url) {
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup
+                    .connect(url)
+                    .timeout(300 * 1000)
+                    .get();
             Element event_list = doc.getElementsByClass("event-list").first();
 
             StringBuilder sb = new StringBuilder();
