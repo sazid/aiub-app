@@ -9,9 +9,10 @@
     <string name="pref_username_key">pref_username_key</string>
     <string name="pref_password_key">pref_password_key</string>
 
-    <string name="about">Author:
+    <string name="about">Developer:
         \nMohammed Sazid Al Rashid
         \nID: 17-33330-1
         \nhttps://github.com/sazid/
+        \nhttps://szore.blogspot.com/
     </string>
 </resources>
