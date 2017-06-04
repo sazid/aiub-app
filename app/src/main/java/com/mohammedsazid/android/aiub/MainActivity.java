@@ -91,8 +91,10 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // check for any new notice
-        CheckNoticeService.startActionCheckNotice(this);
+//        NoticeCheckIntentService.startActionCheckNotice(this);
         startService(new Intent(this, NetworkChangeService.class));
+
+
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
             webView.loadUrl("http://portal.aiub.edu/");

@@ -21,18 +21,19 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class CheckNoticeService extends IntentService {
+public class NoticeCheckIntentService extends IntentService {
     private static final String ACTION_CHECK_FOR_NEW_NOTICE =
             "com.mohammedsazid.android.aiub.action.CHECK_FOR_NEW_NOTICE";
-    private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMillis(4);
+    private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMinutes(4);
+//    private static final long REPEAT_INTERVAL = 1;
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
-    public CheckNoticeService() {
-        super("CheckNoticeService");
+    public NoticeCheckIntentService() {
+        super("NoticeCheckIntentService");
     }
 
     public static void startActionCheckNotice(Context context) {
-        Intent intent = new Intent(context, CheckNoticeService.class);
+        Intent intent = new Intent(context, NoticeCheckIntentService.class);
         intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
         context.startService(intent);
     }
@@ -100,7 +101,7 @@ public class CheckNoticeService extends IntentService {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         Intent intent = new Intent();
-        intent.setClass(this, CheckNoticeService.class);
+        intent.setClass(this, NoticeCheckIntentService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
@@ -112,16 +113,19 @@ public class CheckNoticeService extends IntentService {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
+//                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
+                    SystemClock.elapsedRealtime() + deferTime,
                     pi);
         } else {
             alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
+//                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
+                    SystemClock.elapsedRealtime() + deferTime,
                     pi);
         }
     }
 
     private void handleActionCheckNotice() {
+        Log.d(NoticeCheckIntentService.class.getSimpleName(), "Checking for new notice!");
         parseNoticeHTML("http://aiub.edu/category/notices");
         scheduleNewCheck(REPEAT_INTERVAL);
     }

@@ -7,6 +7,6 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 public class NoticeBootReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        CheckNoticeService.startActionCheckNotice(context);
+        NoticeCheckIntentService.startActionCheckNotice(context);
     }
 }

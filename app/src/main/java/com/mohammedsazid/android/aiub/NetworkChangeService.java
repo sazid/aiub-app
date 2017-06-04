@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.util.Log;
 
 public class NetworkChangeService extends Service {
     NetworkChangeReceiver receiver = new NetworkChangeReceiver();
@@ -17,6 +18,8 @@ public class NetworkChangeService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(receiver, filter);
+        NoticeCheckIntentService.startActionCheckNotice(this);
+        Log.d("NetworkChangeService", "Starting service");
 
         return START_STICKY;
     }
