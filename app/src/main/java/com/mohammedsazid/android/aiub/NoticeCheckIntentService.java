@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -68,7 +67,7 @@ public class NoticeCheckIntentService extends IntentService {
                     .getDefaultSharedPreferences(this);
             if (prefs.contains(PREF_NOTICES_KEY) &&
                     (!prefs.getString(PREF_NOTICES_KEY, "").contentEquals(sb))) {
-                Log.d("NOTICE", "Change detected!");
+//                Log.d("NOTICE", "Change detected!");
                 Intent i = new Intent(this, MainActivity.class);
                 i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "http://www.aiub.edu/category/notices");
 
@@ -128,7 +127,7 @@ public class NoticeCheckIntentService extends IntentService {
     }
 
     private void handleActionCheckNotice() {
-        Log.d(NoticeCheckIntentService.class.getSimpleName(), "Checking for new notice!");
+//        Log.d(NoticeCheckIntentService.class.getSimpleName(), "Checking for new notice!");
         parseNoticeHTML("http://www.aiub.edu/category/notices");
         scheduleNewCheck(REPEAT_INTERVAL);
     }
