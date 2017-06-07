@@ -70,7 +70,7 @@ public class NoticeCheckIntentService extends IntentService {
                     (!prefs.getString(PREF_NOTICES_KEY, "").contentEquals(sb))) {
                 Log.d("NOTICE", "Change detected!");
                 Intent i = new Intent(this, MainActivity.class);
-                i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "http://aiub.edu/category/notices");
+                i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "http://www.aiub.edu/category/notices");
 
                 PendingIntent pi = PendingIntent.getActivity(
                         this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -129,7 +129,7 @@ public class NoticeCheckIntentService extends IntentService {
 
     private void handleActionCheckNotice() {
         Log.d(NoticeCheckIntentService.class.getSimpleName(), "Checking for new notice!");
-        parseNoticeHTML("http://aiub.edu/category/notices");
+        parseNoticeHTML("http://www.aiub.edu/category/notices");
         scheduleNewCheck(REPEAT_INTERVAL);
     }
 }

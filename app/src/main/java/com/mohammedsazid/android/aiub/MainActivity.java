@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
 
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
-            webView.loadUrl("http://portal.aiub.edu/");
+            webView.loadUrl("http://www.portal.aiub.edu/");
         } else {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
         }
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
                     return;
 
-                if (url.contentEquals("https://portal.aiub.edu/")) {
+                if (url.startsWith("https://www.portal.aiub.edu/")) {
                     String FIELD_USERNAME_ID = "username";
                     String FIELD_PASSWORD_ID = "password";
                     String FIELD_LOGIN_BUTTON_ID = "login";
@@ -283,13 +283,13 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_portal:
-                webView.loadUrl("http://portal.aiub.edu/");
+                webView.loadUrl("http://www.portal.aiub.edu/");
                 break;
             case R.id.nav_home:
-                webView.loadUrl("http://aiub.edu/");
+                webView.loadUrl("http://www.aiub.edu/");
                 break;
             case R.id.nav_notice:
-                webView.loadUrl("http://aiub.edu/category/notices");
+                webView.loadUrl("http://www.aiub.edu/category/notices");
                 break;
             case R.id.nav_clubs:
                 Snackbar.make(navigationView,
@@ -297,10 +297,10 @@ public class MainActivity extends AppCompatActivity
                         Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.nav_academic_calendar:
-                webView.loadUrl("http://aiub.edu/academics/calendar/");
+                webView.loadUrl("http://www.aiub.edu/academics/calendar/");
                 break;
             case R.id.nav_news:
-                webView.loadUrl("http://aiub.edu/category/news-events");
+                webView.loadUrl("http://www.aiub.edu/category/news-events");
                 break;
             case R.id.nav_logout:
                 logout();
