@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
 
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
-            webView.loadUrl("http://portal.aiub.edu/");
+            webView.loadUrl("https://portal.aiub.edu/");
         } else {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
         }
@@ -139,17 +139,19 @@ public class MainActivity extends AppCompatActivity
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
                     return;
 
-                if (url.startsWith("https://portal.aiub.edu/")) {
+                if (url.contentEquals("https://portal.aiub.edu/") || url.startsWith("https://portal.aiub.edu/Login")) {
                     String FIELD_USERNAME_ID = "username";
                     String FIELD_PASSWORD_ID = "password";
                     String FIELD_LOGIN_BUTTON_ID = "login";
 
                     String jsScript =
-                            "if (document.getElementsByClassName('text-danger').length !== 0) { window.alert('" + WRONG_DETAILS_MSG + "'); } else {" +
-                                    "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
-                                    "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
-                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
-                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click(); }";
+                            "if (document.getElementsByClassName('text-danger').length !== 0 && document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "')) {" +
+                                "window.alert('" + WRONG_DETAILS_MSG + "'); } else {" +
+                                "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
+                                "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
+                                "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
+                                "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
+                            "}";
 
                     // execute the script (click the login button automatically);
                     view.loadUrl("javascript: {" + jsScript + "};");
@@ -161,8 +163,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-//        webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
-
+        webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setAppCachePath(getCacheDir().getAbsolutePath()
                 + File.separator + "appCache" + File.separator);
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_portal:
-                webView.loadUrl("http://portal.aiub.edu/");
+                webView.loadUrl("https://portal.aiub.edu/");
                 break;
             case R.id.nav_home:
                 webView.loadUrl("http://www.aiub.edu/");
