@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
 
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
-            webView.loadUrl("http://www.portal.aiub.edu/");
+            webView.loadUrl("http://portal.aiub.edu/");
         } else {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
         }
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
                     return;
 
-                if (url.startsWith("https://www.portal.aiub.edu/")) {
+                if (url.startsWith("https://portal.aiub.edu/")) {
                     String FIELD_USERNAME_ID = "username";
                     String FIELD_PASSWORD_ID = "password";
                     String FIELD_LOGIN_BUTTON_ID = "login";
@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_portal:
-                webView.loadUrl("http://www.portal.aiub.edu/");
+                webView.loadUrl("http://portal.aiub.edu/");
                 break;
             case R.id.nav_home:
                 webView.loadUrl("http://www.aiub.edu/");
