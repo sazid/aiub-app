@@ -32,8 +32,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
+
 import java.io.File;
+
+import io.fabric.sdk.android.Fabric;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdvancedWebView.Listener {
@@ -98,7 +101,6 @@ public class MainActivity extends AppCompatActivity
         startService(new Intent(this, NetworkChangeService.class));
 
 
-
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
             webView.loadUrl("https://portal.aiub.edu/");
         } else {
@@ -148,13 +150,14 @@ public class MainActivity extends AppCompatActivity
                     String FIELD_LOGIN_BUTTON_ID = "login";
 
                     String jsScript =
-                            "if (document.getElementsByClassName('text-danger').length !== 0 && document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "')) {" +
-                                "window.alert('" + WRONG_DETAILS_MSG + "'); } else {" +
-                                "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
-                                "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
-                                "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
-                                "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
-                            "}";
+                            "if (document.getElementsByClassName('text-danger').length !== 0) {" +
+                                    "window.alert('" + WRONG_DETAILS_MSG + "');" +
+                                    "} else if (document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "')) {" +
+                                    "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
+                                    "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
+                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
+                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
+                                    "}";
 
                     // execute the script (click the login button automatically);
                     view.loadUrl("javascript: {" + jsScript + "};");
@@ -460,9 +463,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
         if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
-            Toast.makeText(this, "Downloading file…", Toast.LENGTH_SHORT).show();
+            Snackbar.make(webView, "Downloading file…", Snackbar.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Failed to download file", Toast.LENGTH_SHORT).show();
+            Snackbar.make(webView, "Failed to download file", Snackbar.LENGTH_SHORT).show();
         }
     }
 

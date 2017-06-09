@@ -13,11 +13,14 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class NoticeCheckIntentService extends IntentService {
@@ -69,7 +72,7 @@ public class NoticeCheckIntentService extends IntentService {
                     (!prefs.getString(PREF_NOTICES_KEY, "").contentEquals(sb))) {
 //                Log.d("NOTICE", "Change detected!");
                 Intent i = new Intent(this, MainActivity.class);
-                i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "http://www.aiub.edu/category/notices");
+                i.putExtra(MainActivity.EXTRA_PRELOAD_URL, url);
 
                 PendingIntent pi = PendingIntent.getActivity(
                         this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -86,15 +89,17 @@ public class NoticeCheckIntentService extends IntentService {
                 NotificationManager notifyMgr =
                         (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 notifyMgr.notify(0, builder.build());
+
+                Answers.getInstance().logCustom(
+                        new CustomEvent("Notice notified"));
             }
 
             prefs.edit()
                     .putString(PREF_NOTICES_KEY, sb.toString())
                     .apply();
-        } catch (IOException e) {
-            // try again after 10 minutes
-//            scheduleNewCheck(10);
+        } catch (Exception e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 
