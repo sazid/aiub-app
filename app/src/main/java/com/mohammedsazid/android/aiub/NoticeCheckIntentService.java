@@ -79,7 +79,7 @@ public class NoticeCheckIntentService extends IntentService {
 
                 NotificationCompat.Builder builder =
                         new NotificationCompat.Builder(this)
-                                .setSmallIcon(R.drawable.ic_notice)
+                                .setSmallIcon(R.drawable.ic_notification_notice)
                                 .setContentTitle("AIUB: New notice")
                                 .setContentText("Tap to view new notice.")
                                 .setAutoCancel(true)
