@@ -50,7 +50,7 @@
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="@string/fabric_api_key" />
+            android:value="321384046aa77d30c21a4829f883d9aec4b23d1d" />
 
     </application>
 

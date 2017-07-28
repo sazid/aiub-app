@@ -147,16 +147,17 @@ public class MainActivity extends AppCompatActivity
                 if (url.contentEquals("https://portal.aiub.edu/") || url.startsWith("https://portal.aiub.edu/Login")) {
                     String FIELD_USERNAME_ID = "username";
                     String FIELD_PASSWORD_ID = "password";
-                    String FIELD_LOGIN_BUTTON_ID = "login";
+//                    String FIELD_LOGIN_BUTTON_ID = "login";
 
                     String jsScript =
-                            "if (document.getElementsByClassName('text-danger').length !== 0) {" +
+                            "if ($('.text-danger').length !== 0) {" +
                                     "window.alert('" + WRONG_DETAILS_MSG + "');" +
-                                    "} else if (document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "')) {" +
-                                    "document.getElementById('" + FIELD_USERNAME_ID + "').value = '" + username + "';" +
-                                    "document.getElementById('" + FIELD_PASSWORD_ID + "').value = '" + password + "';" +
-                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
-                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
+                                    "} else {" +
+                                    "$('#" + FIELD_USERNAME_ID + "').val('" + username + "');" +
+                                    "$('#" + FIELD_PASSWORD_ID + "').val('" + password + "');" +
+//                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
+//                                    " document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
+                                    "$('button').first().click();" +
                                     "}";
 
                     // execute the script (click the login button automatically);
