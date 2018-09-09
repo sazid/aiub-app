@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.JsResult;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -167,6 +169,31 @@ public class MainActivity extends AppCompatActivity
 //                    } else {
 //                    }
                 }
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+                String message = "SSL Certificate error.";
+                switch (error.getPrimaryError()) {
+                    case SslError.SSL_UNTRUSTED:
+                        message = "The certificate authority is not trusted.";
+                        break;
+                    case SslError.SSL_EXPIRED:
+                        message = "The certificate has expired.";
+                        break;
+                    case SslError.SSL_IDMISMATCH:
+                        message = "The certificate Hostname mismatch.";
+                        break;
+                    case SslError.SSL_NOTYETVALID:
+                        message = "The certificate is not yet valid.";
+                        break;
+                }
+//                message += "SSL Certificate Error";
+
+                Fabric.getLogger().e("SSL Certificate Error", message);
+
+                // aiub does not send valid certificates sometime, which causes the loading to hang
+                handler.proceed();
             }
         });
 
