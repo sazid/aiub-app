@@ -13,7 +13,7 @@ public class NetworkChangeReceiver extends WakefulBroadcastReceiver {
         int status = NetworkUtil.getConnectivityStatusString(context);
         if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             if (status != NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-                NoticeCheckIntentService.startActionCheckNotice(context);
+                NoticeCheckJobIntentService.startActionCheckNotice(context);
             }
         }
     }

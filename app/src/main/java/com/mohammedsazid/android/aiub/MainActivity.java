@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // check for any new notice
-//        NoticeCheckIntentService.startActionCheckNotice(this);
+//        NoticeCheckJobIntentService.startActionCheckNotice(this);
         startService(new Intent(this, NetworkChangeService.class));
 
 
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity
                 }
 //                message += "SSL Certificate Error";
 
-                Fabric.getLogger().e("SSL Certificate Error", message);
+                Fabric.getLogger().i("SSL Certificate Error", message);
 
                 // aiub does not send valid certificates sometime, which causes the loading to hang
                 handler.proceed();

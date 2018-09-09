@@ -1,7 +1,6 @@
 package com.mohammedsazid.android.aiub;
 
 import android.app.AlarmManager;
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -11,7 +10,11 @@ import android.database.DatabaseUtils;
 import android.os.Build;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -23,30 +26,53 @@ import org.jsoup.nodes.Element;
 
 import java.util.concurrent.TimeUnit;
 
-public class NoticeCheckIntentService extends IntentService {
+public class NoticeCheckJobIntentService extends JobIntentService {
     private static final String ACTION_CHECK_FOR_NEW_NOTICE =
             "com.mohammedsazid.android.aiub.action.CHECK_FOR_NEW_NOTICE";
     private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMinutes(1);
-//    private static final long REPEAT_INTERVAL = 1;
+    //    private static final long REPEAT_INTERVAL = 1;
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
-    public NoticeCheckIntentService() {
-        super("NoticeCheckIntentService");
-    }
 
     public static void startActionCheckNotice(Context context) {
-        Intent intent = new Intent(context, NoticeCheckIntentService.class);
+        Intent intent = new Intent(context, NoticeCheckJobIntentService.class);
         intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
-        context.startService(intent);
+//        context.startService(intent);
+        ContextCompat.startForegroundService(context, intent);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_CHECK_FOR_NEW_NOTICE.equals(action)) {
-                handleActionCheckNotice();
-            }
+    public void onDestroy() {
+        super.onDestroy();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true); //true will remove notification
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationCompat.Builder builder = new NotificationCompat
+                    .Builder(this, "Notice Service")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setWhen(System.currentTimeMillis())
+                    .setPriority(NotificationManager.IMPORTANCE_NONE)
+                    .setContentTitle("AIUB App")
+                    .setTicker("AIUB App: Checking new notices")
+                    .setContentText("AIUB App: Checking new notices")
+                    .setContentInfo("Info");
+
+            Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Starting foreground service...");
+            startForeground(1000, builder.build());
+        }
+    }
+
+    @Override
+    protected void onHandleWork(@NonNull Intent intent) {
+        final String action = intent.getAction();
+        if (ACTION_CHECK_FOR_NEW_NOTICE.equals(action)) {
+            handleActionCheckNotice();
         }
     }
 
@@ -78,7 +104,7 @@ public class NoticeCheckIntentService extends IntentService {
                         this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder =
-                        new NotificationCompat.Builder(this)
+                        new NotificationCompat.Builder(this, "Notice")
                                 .setSmallIcon(R.drawable.ic_notification_notice)
                                 .setContentTitle("AIUB: New notice")
                                 .setContentText("Tap to view new notice.")
@@ -88,7 +114,9 @@ public class NoticeCheckIntentService extends IntentService {
 
                 NotificationManager notifyMgr =
                         (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notifyMgr.notify(0, builder.build());
+                if (notifyMgr != null) {
+                    notifyMgr.notify(0, builder.build());
+                }
 
                 Answers.getInstance().logCustom(
                         new CustomEvent("Notice notified"));
@@ -108,7 +136,7 @@ public class NoticeCheckIntentService extends IntentService {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         Intent intent = new Intent();
-        intent.setClass(this, NoticeCheckIntentService.class);
+        intent.setClass(this, NoticeCheckJobIntentService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
@@ -116,24 +144,31 @@ public class NoticeCheckIntentService extends IntentService {
         PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
 
         // cancel any previous alarm
-        alarmManager.cancel(pi);
+        if (alarmManager != null) {
+            alarmManager.cancel(pi);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
-//                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
-                    SystemClock.elapsedRealtime() + deferTime,
-                    pi);
+            if (alarmManager != null) {
+                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
+                        SystemClock.elapsedRealtime() + deferTime,
+                        pi);
+            }
         } else {
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-//                    SystemClock.elapsedRealtime() + TimeUnit.HOURS.toMillis(deferTime),
-                    SystemClock.elapsedRealtime() + deferTime,
-                    pi);
+            if (alarmManager != null) {
+                alarmManager.set(AlarmManager.ELAPSED_REALTIME,
+                        SystemClock.elapsedRealtime() + deferTime,
+                        pi);
+            }
         }
     }
 
     private void handleActionCheckNotice() {
-//        Log.d(NoticeCheckIntentService.class.getSimpleName(), "Checking for new notice!");
+//        Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Checking for new notice!");
         parseNoticeHTML("http://www.aiub.edu/category/notices");
         scheduleNewCheck(REPEAT_INTERVAL);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true); //true will remove notification
+        }
     }
 }
