@@ -1,12 +1,15 @@
 package com.mohammedsazid.android.aiub;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -49,10 +52,31 @@ public class NoticeCheckJobIntentService extends JobIntentService {
         }
     }
 
+    @NonNull
+    @TargetApi(26)
+    private synchronized String createChannel(String channelId) {
+        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int importance = NotificationManager.IMPORTANCE_LOW;
+
+        NotificationChannel mChannel = new NotificationChannel("Notice Service", channelId, importance);
+
+        mChannel.enableLights(true);
+        mChannel.setLightColor(Color.BLUE);
+        if (mNotificationManager != null) {
+            mNotificationManager.createNotificationChannel(mChannel);
+        } else {
+            stopSelf();
+        }
+        return channelId;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel("Notice Service");
+
             NotificationCompat.Builder builder = new NotificationCompat
                     .Builder(this, "Notice Service")
                     .setSmallIcon(R.mipmap.ic_launcher)
@@ -103,6 +127,7 @@ public class NoticeCheckJobIntentService extends JobIntentService {
                 PendingIntent pi = PendingIntent.getActivity(
                         this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
+                createChannel("Notice");
                 NotificationCompat.Builder builder =
                         new NotificationCompat.Builder(this, "Notice")
                                 .setSmallIcon(R.drawable.ic_notification_notice)
