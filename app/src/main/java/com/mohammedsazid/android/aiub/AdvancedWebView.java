@@ -53,6 +53,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
+
 /*
  * Android-AdvancedWebView (https://github.com/delight-im/Android-AdvancedWebView)
  * Copyright (c) delight.im (https://www.delight.im/)
@@ -1194,16 +1196,12 @@ public class AdvancedWebView extends WebView {
      * @return whether the download has been successfully handled or not
      */
     public static boolean handleDownload(final Context context, final String fromUrl, final String toFilename) {
-        if (Build.VERSION.SDK_INT < 9) {
-            throw new RuntimeException("Method requires API level 9 or above");
-        }
-
         final Request request = new Request(Uri.parse(fromUrl));
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, toFilename);
 
-        final DownloadManager dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        final DownloadManager dm = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
         try {
             try {
                 dm.enqueue(request);
@@ -1231,11 +1229,7 @@ public class AdvancedWebView extends WebView {
         }
     }
 
-    private static boolean openAppSettings(final Context context, final String packageName) {
-        if (Build.VERSION.SDK_INT < 9) {
-            throw new RuntimeException("Method requires API level 9 or above");
-        }
-
+    public static boolean openAppSettings(final Context context, final String packageName) {
         try {
             final Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             intent.setData(Uri.parse("package:" + packageName));

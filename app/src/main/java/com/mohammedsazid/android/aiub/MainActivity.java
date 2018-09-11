@@ -1,5 +1,6 @@
 package com.mohammedsazid.android.aiub;
 
+import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -8,7 +9,9 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -25,8 +28,10 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -197,6 +202,48 @@ public class MainActivity extends AppCompatActivity
 
                 // aiub does not send valid certificates sometime, which causes the loading to hang
             }
+        });
+
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+
+            request.setMimeType(mimetype);
+            //------------------------COOKIE!!------------------------
+            String cookies = CookieManager.getInstance().getCookie(url);
+            request.addRequestHeader("cookie", cookies);
+            //------------------------COOKIE!!------------------------
+            request.addRequestHeader("User-Agent", userAgent);
+            request.setDescription("Downloading file...");
+            request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype));
+            request.allowScanningByMediaScanner();
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype));
+            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+            try {
+                try {
+                    dm.enqueue(request);
+                } catch (SecurityException e) {
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                    dm.enqueue(request);
+                }
+            } catch (SecurityException e) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    Toast.makeText(this, "Please enable STORAGE permission!",
+                            Toast.LENGTH_LONG).show();
+                    AdvancedWebView.openAppSettings(this, getPackageName());
+                }
+
+                return;
+            }
+            // if the download manager app has been disabled on the device
+            catch (IllegalArgumentException e) {
+                // show the settings screen where the user can enable the download manager app again
+                AdvancedWebView.openAppSettings(this, AdvancedWebView.PACKAGE_NAME_DOWNLOAD_MANAGER);
+                return;
+            }
+
+            Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
         });
 
         webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
@@ -430,11 +477,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
-        if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
-            Snackbar.make(webView, "Downloading file…", Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(webView, "Failed to download file", Snackbar.LENGTH_SHORT).show();
-        }
+        //        if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
+//            Snackbar.make(webView, "Downloading file…", Snackbar.LENGTH_SHORT).show();
+//        } else {
+//            Snackbar.make(webView, "Failed to download file", Snackbar.LENGTH_SHORT).show();
+//        }
     }
 
     @Override
