@@ -3,13 +3,13 @@ package com.mohammedsazid.android.aiub;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity
     public static final String EXTRA_PRELOAD_URL = "EXTRA_PRELOAD_URL";
     public static final String WRONG_DETAILS_MSG = "Wrong username/password!";
 
+    private Handler handler = new Handler();
+
     private Toolbar toolbar;
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -77,18 +79,17 @@ public class MainActivity extends AppCompatActivity
         setupWebView();
 
         setSupportActionBar(toolbar);
-        toolbar.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(webView.getUrl(), webView.getUrl());
+        toolbar.setOnLongClickListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(webView.getUrl(), webView.getUrl());
+            if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
-
-                Snackbar.make(v,
-                        "URL copied into clipboard",
-                        Snackbar.LENGTH_SHORT).show();
-                return true;
             }
+
+            Snackbar.make(v,
+                    "URL copied into clipboard",
+                    Snackbar.LENGTH_SHORT).show();
+            return true;
         });
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -109,17 +110,51 @@ public class MainActivity extends AppCompatActivity
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
         }
 
-        TextView navUsername = (TextView) navigationView.getHeaderView(0)
+        TextView navUsername = navigationView.getHeaderView(0)
                 .findViewById(R.id.nav_username);
         navUsername.setText(getUsername());
     }
 
     private void bindViews() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        webView = (AdvancedWebView) findViewById(R.id.web_view);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        toolbar = findViewById(R.id.toolbar);
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        webView = findViewById(R.id.web_view);
+        progressBar = findViewById(R.id.progressBar);
+    }
+
+    private void login(WebView view, String url) {
+        String username = getUsername();
+        String password = getPassword();
+
+        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
+            return;
+
+        if (url.contentEquals("https://portal.aiub.edu/") || url.startsWith("https://portal.aiub.edu/Login")) {
+            String FIELD_USERNAME_ID = "username";
+            String FIELD_PASSWORD_ID = "password";
+//                    String FIELD_LOGIN_BUTTON_ID = "login";
+
+            String jsScript =
+                    "if ($('.text-danger').length !== 0) {" +
+                            "window.alert('" + WRONG_DETAILS_MSG + "');" +
+                            "} else {" +
+                            "$('#" + FIELD_USERNAME_ID + "').val('" + username + "');" +
+                            "$('#" + FIELD_PASSWORD_ID + "').val('" + password + "');" +
+//                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
+//                                    " document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
+                            "$('button').first().click();" +
+                            "}";
+
+            // execute the script (click the login button automatically);
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                        view.evaluateJavascript(jsScript, null);
+//                    } else {
+//                    }
+
+            handler.postDelayed(() ->
+                    view.loadUrl("javascript: {" + jsScript + "};"), 500);
+        }
     }
 
     private void setupWebView() {
@@ -139,40 +174,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
-                String username = getUsername();
-                String password = getPassword();
-
-                if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password))
-                    return;
-
-                if (url.contentEquals("https://portal.aiub.edu/") || url.startsWith("https://portal.aiub.edu/Login")) {
-                    String FIELD_USERNAME_ID = "username";
-                    String FIELD_PASSWORD_ID = "password";
-//                    String FIELD_LOGIN_BUTTON_ID = "login";
-
-                    String jsScript =
-                            "if ($('.text-danger').length !== 0) {" +
-                                    "window.alert('" + WRONG_DETAILS_MSG + "');" +
-                                    "} else {" +
-                                    "$('#" + FIELD_USERNAME_ID + "').val('" + username + "');" +
-                                    "$('#" + FIELD_PASSWORD_ID + "').val('" + password + "');" +
-//                                    "document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').disabled = false;" +
-//                                    " document.getElementById('" + FIELD_LOGIN_BUTTON_ID + "').click();" +
-                                    "$('button').first().click();" +
-                                    "}";
-
-                    // execute the script (click the login button automatically);
-                    view.loadUrl("javascript: {" + jsScript + "};");
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                        view.evaluateJavascript(jsScript, null);
-//                    } else {
-//                    }
-                }
+                login(view, url);
             }
 
             @Override
             public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+                handler.proceed();
                 String message = "SSL Certificate error.";
                 switch (error.getPrimaryError()) {
                     case SslError.SSL_UNTRUSTED:
@@ -193,7 +200,6 @@ public class MainActivity extends AppCompatActivity
                 Fabric.getLogger().i("SSL Certificate Error", message);
 
                 // aiub does not send valid certificates sometime, which causes the loading to hang
-                handler.proceed();
             }
         });
 
@@ -345,7 +351,7 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         drawer.setSelected(false);
         return true;
@@ -370,16 +376,11 @@ public class MainActivity extends AppCompatActivity
         new AlertDialog.Builder(this)
                 .setTitle("About")
                 .setMessage(getString(R.string.about))
-                .setPositiveButton("CONTACT ME", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        composeEmail(
-                                new String[]{"sazidozon@gmail.com"},
-                                "[AIUB app]: {your subject here}",
-                                ""
-                        );
-                    }
-                })
+                .setPositiveButton("CONTACT ME", (dialog, which) -> composeEmail(
+                        new String[]{"sazidozon@gmail.com"},
+                        "[AIUB app]: {your subject here}",
+                        ""
+                ))
                 .create()
                 .show();
     }
@@ -412,6 +413,35 @@ public class MainActivity extends AppCompatActivity
         }
     }
 */
+
+    @Override
+    public void onPageStarted(String url, Bitmap favicon) {
+
+    }
+
+    @Override
+    public void onPageFinished(String url) {
+
+    }
+
+    @Override
+    public void onPageError(int errorCode, String description, String failingUrl) {
+
+    }
+
+    @Override
+    public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
+        if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
+            Snackbar.make(webView, "Downloading file…", Snackbar.LENGTH_SHORT).show();
+        } else {
+            Snackbar.make(webView, "Failed to download file", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onExternalPageRequest(String url) {
+
+    }
 
     private class CustomWebChromeClient extends WebChromeClient {
 
@@ -471,34 +501,5 @@ public class MainActivity extends AppCompatActivity
             super.onHideCustomView();
 //            revertFullscreenVideo();
         }
-    }
-
-    @Override
-    public void onPageStarted(String url, Bitmap favicon) {
-
-    }
-
-    @Override
-    public void onPageFinished(String url) {
-
-    }
-
-    @Override
-    public void onPageError(int errorCode, String description, String failingUrl) {
-
-    }
-
-    @Override
-    public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
-        if (AdvancedWebView.handleDownload(this, url, suggestedFilename)) {
-            Snackbar.make(webView, "Downloading file…", Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(webView, "Failed to download file", Snackbar.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onExternalPageRequest(String url) {
-
     }
 }
