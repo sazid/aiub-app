@@ -30,14 +30,13 @@ import org.jsoup.nodes.Element;
 import java.util.concurrent.TimeUnit;
 
 public class NoticeCheckJobIntentService extends JobIntentService {
-    private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMinutes(1);
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
 
     public static void startActionCheckNotice(Context context) {
         Intent intent = new Intent(context, NoticeCheckJobIntentService.class);
         enqueueWork(context, NoticeCheckJobIntentService.class, 1, intent);
-        ContextCompat.startForegroundService(context, intent);
+//        ContextCompat.startForegroundService(context, intent);
     }
 
     @NonNull
@@ -82,7 +81,9 @@ public class NoticeCheckJobIntentService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
+        Log.d("SERVICE", "Starting work");
         handleActionCheckNotice();
+        Log.d("SERVICE", "Work done");
     }
 
     private void parseNoticeHTML(String url) {
@@ -141,40 +142,9 @@ public class NoticeCheckJobIntentService extends JobIntentService {
         }
     }
 
-    private void scheduleNewCheck(long minutes) {
-        long deferTime = TimeUnit.MINUTES.toMillis(minutes);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        Intent intent = new Intent();
-        intent.setClass(this, NoticeCheckJobIntentService.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
-
-        // cancel any previous alarm
-        if (alarmManager != null) {
-            alarmManager.cancel(pi);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (alarmManager != null) {
-                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
-                        SystemClock.elapsedRealtime() + deferTime,
-                        pi);
-            }
-        } else {
-            if (alarmManager != null) {
-                alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                        SystemClock.elapsedRealtime() + deferTime,
-                        pi);
-            }
-        }
-    }
-
     private void handleActionCheckNotice() {
         parseNoticeHTML("http://www.aiub.edu/category/notices");
-        scheduleNewCheck(REPEAT_INTERVAL);
+        NoticeAlarmReceiver.scheduleNewCheck(this);
         Log.d("SERVICE", "Check complete");
 
         try {
@@ -186,5 +156,7 @@ public class NoticeCheckJobIntentService extends JobIntentService {
             e.printStackTrace();
             Crashlytics.logException(e);
         }
+
+        stopSelf();
     }
 }
