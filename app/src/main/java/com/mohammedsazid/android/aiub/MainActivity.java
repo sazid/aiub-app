@@ -177,31 +177,6 @@ public class MainActivity extends AppCompatActivity
                 super.onPageFinished(view, url);
                 login(view, url);
             }
-
-            @Override
-            public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
-                handler.proceed();
-                String message = "SSL Certificate error.";
-                switch (error.getPrimaryError()) {
-                    case SslError.SSL_UNTRUSTED:
-                        message = "The certificate authority is not trusted.";
-                        break;
-                    case SslError.SSL_EXPIRED:
-                        message = "The certificate has expired.";
-                        break;
-                    case SslError.SSL_IDMISMATCH:
-                        message = "The certificate Hostname mismatch.";
-                        break;
-                    case SslError.SSL_NOTYETVALID:
-                        message = "The certificate is not yet valid.";
-                        break;
-                }
-//                message += "SSL Certificate Error";
-
-                Fabric.getLogger().i("SSL Certificate Error", message);
-
-                // aiub does not send valid certificates sometime, which causes the loading to hang
-            }
         });
 
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
