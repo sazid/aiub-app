@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -98,11 +99,6 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
-
-        // check for any new notice
-//        NoticeCheckJobIntentService.startActionCheckNotice(this);
-        startService(new Intent(this, NetworkChangeService.class));
-
 
         if (getIntent().getStringExtra(EXTRA_PRELOAD_URL) == null) {
             webView.loadUrl("https://portal.aiub.edu/");
@@ -245,6 +241,9 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         webView.onResume();
+
+        // check for any new notice
+        NoticeCheckJobIntentService.startActionCheckNotice(this);
 
         if (!TextUtils.isEmpty(getIntent().getStringExtra(EXTRA_PRELOAD_URL))) {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));

@@ -30,36 +30,26 @@ import org.jsoup.nodes.Element;
 import java.util.concurrent.TimeUnit;
 
 public class NoticeCheckJobIntentService extends JobIntentService {
-    private static final String ACTION_CHECK_FOR_NEW_NOTICE =
-            "com.mohammedsazid.android.aiub.action.CHECK_FOR_NEW_NOTICE";
     private static final long REPEAT_INTERVAL = TimeUnit.HOURS.toMinutes(1);
-    //    private static final long REPEAT_INTERVAL = 1;
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
 
     public static void startActionCheckNotice(Context context) {
         Intent intent = new Intent(context, NoticeCheckJobIntentService.class);
-        intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
-//        context.startService(intent);
+        enqueueWork(context, NoticeCheckJobIntentService.class, 1, intent);
         ContextCompat.startForegroundService(context, intent);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            stopForeground(true); //true will remove notification
-        }
     }
 
     @NonNull
     @TargetApi(26)
     private synchronized String createChannel(String channelId) {
-        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager)
+                this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        int importance = NotificationManager.IMPORTANCE_LOW;
-
-        NotificationChannel mChannel = new NotificationChannel("Notice Service", channelId, importance);
+        NotificationChannel mChannel = new NotificationChannel(
+                "Notice Service",
+                channelId,
+                NotificationManager.IMPORTANCE_LOW);
 
         mChannel.enableLights(true);
         mChannel.setLightColor(Color.BLUE);
@@ -75,36 +65,31 @@ public class NoticeCheckJobIntentService extends JobIntentService {
     public void onCreate() {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel("Notice Service");
-
             NotificationCompat.Builder builder = new NotificationCompat
-                    .Builder(this, "Notice Service")
+                    .Builder(this, createChannel("Notice Service"))
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setWhen(System.currentTimeMillis())
-                    .setPriority(NotificationManager.IMPORTANCE_NONE)
+                    .setPriority(NotificationManager.IMPORTANCE_LOW)
                     .setContentTitle("AIUB App")
                     .setTicker("AIUB App: Checking new notices")
                     .setContentText("AIUB App: Checking new notices")
                     .setContentInfo("Info");
 
             Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Starting foreground service...");
-            startForeground(1000, builder.build());
+            startForeground(1, builder.build());
         }
     }
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        final String action = intent.getAction();
-        if (ACTION_CHECK_FOR_NEW_NOTICE.equals(action)) {
-            handleActionCheckNotice();
-        }
+        handleActionCheckNotice();
     }
 
     private void parseNoticeHTML(String url) {
         try {
             Document doc = Jsoup
                     .connect(url)
-                    .timeout(300 * 1000)
+                    .timeout(60 * 1000)
                     .get();
             Element event_list = doc.getElementsByClass("event-list").first();
 
@@ -164,7 +149,6 @@ public class NoticeCheckJobIntentService extends JobIntentService {
         intent.setClass(this, NoticeCheckJobIntentService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setAction(ACTION_CHECK_FOR_NEW_NOTICE);
 
         PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
 
@@ -189,11 +173,18 @@ public class NoticeCheckJobIntentService extends JobIntentService {
     }
 
     private void handleActionCheckNotice() {
-//        Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Checking for new notice!");
         parseNoticeHTML("http://www.aiub.edu/category/notices");
         scheduleNewCheck(REPEAT_INTERVAL);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            stopForeground(true); //true will remove notification
+        Log.d("SERVICE", "Check complete");
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                stopForeground(true); //true will remove notification
+                Log.d("SERVICE", "Stopping foreground");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 }

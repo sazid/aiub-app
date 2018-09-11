@@ -7,6 +7,8 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import io.fabric.sdk.android.Fabric;
+
 public class NetworkChangeService extends Service {
     NetworkChangeReceiver receiver = new NetworkChangeReceiver();
 
@@ -26,8 +28,13 @@ public class NetworkChangeService extends Service {
 
     @Override
     public void onDestroy() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
+        try {
+            if (receiver != null) {
+                unregisterReceiver(receiver);
+            }
+        } catch (Exception e) {
+            Log.e(NetworkChangeService.class.getSimpleName(), e.getMessage());
+            Fabric.getLogger().e(NetworkChangeService.class.getSimpleName(), e.getMessage());
         }
         super.onDestroy();
     }
