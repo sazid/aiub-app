@@ -1,7 +1,6 @@
 package com.mohammedsazid.android.aiub;
 
 import android.annotation.TargetApi;
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,12 +10,10 @@ import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -26,8 +23,6 @@ import com.crashlytics.android.answers.CustomEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import java.util.concurrent.TimeUnit;
 
 public class NoticeCheckJobIntentService extends JobIntentService {
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
@@ -41,14 +36,14 @@ public class NoticeCheckJobIntentService extends JobIntentService {
 
     @NonNull
     @TargetApi(26)
-    private synchronized String createChannel(String channelId) {
+    private synchronized String createChannel(String channelId, int importance) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         NotificationChannel mChannel = new NotificationChannel(
-                "Notice Service",
                 channelId,
-                NotificationManager.IMPORTANCE_LOW);
+                channelId,
+                importance);
 
         mChannel.enableLights(true);
         mChannel.setLightColor(Color.BLUE);
@@ -64,19 +59,17 @@ public class NoticeCheckJobIntentService extends JobIntentService {
     public void onCreate() {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder builder = new NotificationCompat
-                    .Builder(this, createChannel("Notice Service"))
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setWhen(System.currentTimeMillis())
-                    .setPriority(NotificationManager.IMPORTANCE_LOW)
-                    .setContentTitle("AIUB App")
-                    .setTicker("AIUB App: Checking new notices")
-                    .setContentText("AIUB App: Checking new notices")
-                    .setContentInfo("Info");
-
-            Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Starting foreground service...");
-            startForeground(1, builder.build());
+            createChannel("Notice Service", NotificationManager.IMPORTANCE_LOW);
         }
+
+        NotificationCompat.Builder builder = new NotificationCompat
+                .Builder(this, "Notice Service")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Checking for new notices");
+
+        Log.d(NoticeCheckJobIntentService.class.getSimpleName(), "Starting foreground service...");
+        startForeground(1, builder.build());
     }
 
     @Override
@@ -104,20 +97,26 @@ public class NoticeCheckJobIntentService extends JobIntentService {
 
             SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(this);
+
             if (prefs.contains(PREF_NOTICES_KEY) &&
                     (!prefs.getString(PREF_NOTICES_KEY, "").contentEquals(sb))) {
+
 //                Log.d("NOTICE", "Change detected!");
+
                 Intent i = new Intent(this, MainActivity.class);
                 i.putExtra(MainActivity.EXTRA_PRELOAD_URL, url);
 
                 PendingIntent pi = PendingIntent.getActivity(
-                        this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT);
+                        this, 1, i, 0);
 
-                createChannel("Notice");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    createChannel("Notice", NotificationManager.IMPORTANCE_MAX);
+                }
+
                 NotificationCompat.Builder builder =
                         new NotificationCompat.Builder(this, "Notice")
                                 .setSmallIcon(R.drawable.ic_notification_notice)
-                                .setContentTitle("AIUB: New notice")
+                                .setContentTitle("New notice")
                                 .setContentText("Tap to view new notice.")
                                 .setAutoCancel(true)
                                 .setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -125,8 +124,9 @@ public class NoticeCheckJobIntentService extends JobIntentService {
 
                 NotificationManager notifyMgr =
                         (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
                 if (notifyMgr != null) {
-                    notifyMgr.notify(0, builder.build());
+                    notifyMgr.notify(120, builder.build());
                 }
 
                 Answers.getInstance().logCustom(
@@ -147,16 +147,8 @@ public class NoticeCheckJobIntentService extends JobIntentService {
         NoticeAlarmReceiver.scheduleNewCheck(this);
         Log.d("SERVICE", "Check complete");
 
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                stopForeground(true); //true will remove notification
-                Log.d("SERVICE", "Stopping foreground");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-
+        stopForeground(true); //true will remove notification
+        Log.d("SERVICE", "Stopping foreground");
         stopSelf();
     }
 }
