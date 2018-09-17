@@ -370,6 +370,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_about:
                 showHelp();
                 break;
+            case R.id.nav_other_apps:
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("market://search?q=pub:Sazid")));
+                break;
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
