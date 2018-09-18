@@ -46,6 +46,12 @@
             android:title="About" />
 
         <item
+            android:id="@+id/nav_rate"
+            android:checkable="false"
+            android:icon="@drawable/ic_stars"
+            android:title="Rate" />
+
+        <item
             android:id="@+id/nav_other_apps"
             android:checkable="false"
             android:title="Other Apps" />
