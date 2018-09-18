@@ -39,19 +39,15 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
-import java.io.File;
-
 import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AdvancedWebView.Listener {
-
-    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 5469;
+        implements NavigationView.OnNavigationItemSelectedListener, CustomWebView.Listener {
 
     public static final String EXTRA_PRELOAD_URL = "EXTRA_PRELOAD_URL";
     public static final String WRONG_DETAILS_MSG = "Wrong username/password!";
-
+    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 5469;
     private Handler handler = new Handler();
 
     private Toolbar toolbar;
@@ -59,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private ProgressBar progressBar;
 
-    private AdvancedWebView webView;
+    private CustomWebView webView;
     @SuppressWarnings("FieldCanBeLocal")
     private CustomWebChromeClient webChromeClient;
 
@@ -162,14 +158,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupWebView() {
-        webView.setCookiesEnabled(true);
-        webView.setThirdPartyCookiesEnabled(true);
-        webView.setDesktopMode(false);
-        webView.getSettings().setSupportZoom(true);
-        webView.getSettings().setBuiltInZoomControls(true);
-        webView.getSettings().setDisplayZoomControls(false);
-        webView.getSettings().setLoadsImagesAutomatically(true);
-
         webView.setListener(this, this);
 
         webChromeClient = new CustomWebChromeClient();
@@ -223,12 +211,6 @@ public class MainActivity extends AppCompatActivity
 
             Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
         });
-
-        webView.addHttpHeader("X-Requested-With", getString(R.string.app_name));
-        webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setAppCachePath(getCacheDir().getAbsolutePath()
-                + File.separator + "appCache" + File.separator);
-        webView.setSaveEnabled(true);
     }
 
     private String getPassword() {
@@ -398,6 +380,10 @@ public class MainActivity extends AppCompatActivity
                 } catch (android.content.ActivityNotFoundException ignored) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
                 }
+                break;
+
+            case R.id.nav_check_notification:
+                NotificationService.enqueue(this);
                 break;
         }
 

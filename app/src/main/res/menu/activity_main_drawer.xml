@@ -55,5 +55,11 @@
             android:id="@+id/nav_other_apps"
             android:checkable="false"
             android:title="Other Apps" />
+
+        <item
+            android:id="@+id/nav_check_notification"
+            android:checkable="false"
+            android:title="Check notification" />
+
     </group>
 </menu>
