@@ -1,8 +1,10 @@
 package com.mohammedsazid.android.aiub;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,14 +25,18 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 
 
 public class NotificationService extends JobIntentService {
 
     public static final String WRONG_DETAILS_MSG = "Wrong username/password!";
+    public static final String NOTIFICATIONS_MSG = "NOTIFICATIONS:";
+    private static final String PREF_NOTIFICATIONS_KEY = "PREF_NOTIFICATIONS_KEY";
+
     private CustomWebView webView;
     private SharedPreferences prefs;
 
@@ -93,7 +99,9 @@ public class NotificationService extends JobIntentService {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                if (message.contentEquals(WRONG_DETAILS_MSG)) {
+                if (message.startsWith(NOTIFICATIONS_MSG)) {
+                    parseNotification(message);
+                } else if (message.contentEquals(WRONG_DETAILS_MSG)) {
                     SHOULD_STOP = true;
                     return true;
                 }
@@ -110,13 +118,21 @@ public class NotificationService extends JobIntentService {
                     case "https://portal.aiub.edu/Student":
                     case "https://portal.aiub.edu/Student/":
                         Log.d("NotificationService", "Logged in");
-                        toast("Logged in");
                         webView.loadUrl("https://portal.aiub.edu/Student/Notification");
                         break;
                     case "https://portal.aiub.edu/Student/Notification":
                     case "https://portal.aiub.edu/Student/Notification/":
-                        toast("Loaded notifications");
-                        SHOULD_STOP = true;
+                        Log.d("NotificationService", "Loaded notifications");
+                        try {
+                            new Handler(getMainLooper()).postDelayed(() -> {
+                                if (webView != null) {
+                                    webView.loadUrl(
+                                            "javascript: {alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text())}"
+                                    );
+                                }
+                            }, 10000);
+                        } catch (Exception ignored) {
+                        }
                         break;
                     case "https://portal.aiub.edu/":
                         Log.d("NotificationService", "Logging in...");
@@ -143,8 +159,50 @@ public class NotificationService extends JobIntentService {
         webView.loadUrl("https://portal.aiub.edu/");
     }
 
-    private void toast(String msg) {
-        Toast.makeText(NotificationService.this, msg, Toast.LENGTH_SHORT).show();
+    @SuppressLint("ApplySharedPref")
+    private void parseNotification(String newMsg) {
+        if (prefs.contains(PREF_NOTIFICATIONS_KEY) &&
+                !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
+                !newMsg.contentEquals(prefs.getString(PREF_NOTIFICATIONS_KEY, ""))) {
+            postNewNoticeNotification();
+        }
+
+        prefs.edit()
+                .putString(PREF_NOTIFICATIONS_KEY, newMsg)
+                .commit();
+
+        SHOULD_STOP = true;
+    }
+
+    private void postNewNoticeNotification() {
+        Intent i = new Intent(this, MainActivity.class);
+        i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "https://portal.aiub.edu/");
+
+        PendingIntent pi = PendingIntent.getActivity(
+                this, 1, i, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel("Portal Notification", NotificationManager.IMPORTANCE_MAX);
+        }
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this, "Portal Notification")
+                        .setSmallIcon(R.drawable.ic_notification_notice)
+                        .setContentTitle("New portal notification")
+                        .setContentText("Tap to view new notification")
+                        .setAutoCancel(true)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setContentIntent(pi);
+
+        NotificationManager notifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        if (notifyMgr != null) {
+            notifyMgr.notify(121, builder.build());
+        }
+
+        Answers.getInstance().logCustom(
+                new CustomEvent("Portal notification notified"));
     }
 
     private void login(WebView view, String url) {
@@ -172,7 +230,6 @@ public class NotificationService extends JobIntentService {
                     view.loadUrl("javascript: {" + jsScript + "};"), 500);
         }
     }
-
 
     @NonNull
     @TargetApi(26)

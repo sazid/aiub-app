@@ -117,7 +117,7 @@ public class NoticeCheckJobIntentService extends JobIntentService {
                         new NotificationCompat.Builder(this, "Notice")
                                 .setSmallIcon(R.drawable.ic_notification_notice)
                                 .setContentTitle("New notice")
-                                .setContentText("Tap to view new notice.")
+                                .setContentText("Tap to view new notice")
                                 .setAutoCancel(true)
                                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                                 .setContentIntent(pi);
