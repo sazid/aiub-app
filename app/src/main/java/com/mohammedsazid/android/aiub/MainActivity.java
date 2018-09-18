@@ -38,6 +38,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private ProgressBar progressBar;
+    private AdView mAdView;
 
     private CustomWebView webView;
     @SuppressWarnings("FieldCanBeLocal")
@@ -113,6 +117,14 @@ public class MainActivity extends AppCompatActivity
         TextView navUsername = navigationView.getHeaderView(0)
                 .findViewById(R.id.nav_username);
         navUsername.setText(getUsername());
+
+        initAd();
+    }
+
+    private void initAd() {
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     private void bindViews() {

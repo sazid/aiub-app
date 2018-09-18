@@ -162,6 +162,8 @@ public class NotificationService extends JobIntentService {
 
     @SuppressLint("ApplySharedPref")
     private void parseNotification(String newMsg) {
+        Log.d("NOTIFICATION", prefs.getString(PREF_NOTIFICATIONS_KEY, ""));
+
         if (prefs.contains(PREF_NOTIFICATIONS_KEY) &&
                 !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
                 !newMsg.contentEquals(prefs.getString(PREF_NOTIFICATIONS_KEY, ""))) {
