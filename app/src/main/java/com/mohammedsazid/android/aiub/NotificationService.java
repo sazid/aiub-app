@@ -281,6 +281,13 @@ public class NotificationService extends JobIntentService {
             while (!SHOULD_STOP && tries++ < 90) {
                 Thread.sleep(1000);
             }
+
+            // clean up resources
+            WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            if (wm != null && webView != null) {
+                wm.removeView(webView);
+                webView = null;
+            }
         } catch (Exception ignored) {
         }
     }

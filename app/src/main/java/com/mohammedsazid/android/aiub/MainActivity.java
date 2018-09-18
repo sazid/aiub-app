@@ -69,8 +69,6 @@ public class MainActivity extends AppCompatActivity
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
-        checkPermission();
-
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // check if username or password is stored
@@ -79,6 +77,8 @@ public class MainActivity extends AppCompatActivity
             finish();
             return;
         }
+
+        checkPermission();
 
         bindViews();
         setupWebView();
