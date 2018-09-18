@@ -256,9 +256,6 @@ public class NotificationService extends JobIntentService {
     @Override
     public void onDestroy() {
         if (webView != null) {
-            WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-            if (wm != null) wm.removeView(webView);
-            webView.onDestroy();
             webView = null;
         }
         super.onDestroy();
