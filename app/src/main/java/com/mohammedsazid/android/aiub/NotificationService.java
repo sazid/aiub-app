@@ -162,7 +162,6 @@ public class NotificationService extends JobIntentService {
 
     @SuppressLint("ApplySharedPref")
     private void parseNotification(String newMsg) {
-        prefs.edit().putString(PREF_NOTIFICATIONS_KEY, "").commit();
         if (prefs.contains(PREF_NOTIFICATIONS_KEY) &&
                 !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
                 !newMsg.contentEquals(prefs.getString(PREF_NOTIFICATIONS_KEY, ""))) {
@@ -233,9 +232,8 @@ public class NotificationService extends JobIntentService {
         }
     }
 
-    @NonNull
     @TargetApi(26)
-    private synchronized String createChannel(String channelId, int importance) {
+    private synchronized void createChannel(String channelId, int importance) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -251,7 +249,6 @@ public class NotificationService extends JobIntentService {
         } else {
             SHOULD_STOP = true;
         }
-        return channelId;
     }
 
     @Override
@@ -280,6 +277,7 @@ public class NotificationService extends JobIntentService {
 
         int tries = 0;
         try {
+            // try for 90 seconds
             while (!SHOULD_STOP && tries++ < 90) {
                 Thread.sleep(1000);
             }

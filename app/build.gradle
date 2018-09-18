@@ -22,8 +22,8 @@ android {
         applicationId "com.mohammedsazid.android.aiub"
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 8
-        versionName "1.2.8"
+        versionCode 9
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
