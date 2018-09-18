@@ -123,7 +123,9 @@ public class MainActivity extends AppCompatActivity
 
     private void initAd() {
         mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("2A7E924579ED23D7D38EC8451A9568B0")
+                .build();
         mAdView.loadAd(adRequest);
     }
 
