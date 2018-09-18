@@ -13,7 +13,8 @@ public class NetworkChangeReceiver extends WakefulBroadcastReceiver {
         int status = NetworkUtil.getConnectivityStatusString(context);
         if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             if (status != NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-                NoticeCheckJobIntentService.startActionCheckNotice(context);
+                NoticeCheckJobIntentService.enqueue(context);
+                NotificationService.enqueue(context);
             }
         }
     }
@@ -31,7 +32,10 @@ class NetworkUtil {
     private static int getConnectivityStatus(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = null;
+        if (cm != null) {
+            activeNetwork = cm.getActiveNetworkInfo();
+        }
         if (null != activeNetwork) {
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
                 return TYPE_WIFI;

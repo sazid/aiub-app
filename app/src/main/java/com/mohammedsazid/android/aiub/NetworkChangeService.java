@@ -20,7 +20,8 @@ public class NetworkChangeService extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(receiver, filter);
-        NoticeCheckJobIntentService.startActionCheckNotice(this);
+        NoticeCheckJobIntentService.enqueue(this);
+        NotificationService.enqueue(this);
         Log.d("NetworkChangeService", "Starting service");
 
         return START_STICKY;

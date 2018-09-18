@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +51,7 @@ public class NoticeAlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        NoticeCheckJobIntentService.startActionCheckNotice(context);
+        NoticeCheckJobIntentService.enqueue(context);
+        NotificationService.enqueue(context);
     }
 }

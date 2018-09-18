@@ -125,6 +125,7 @@ public class NotificationService extends JobIntentService {
                         Log.d("NotificationService", "Loaded notifications");
                         try {
                             new Handler(getMainLooper()).postDelayed(() -> {
+                                // wait at least 10 seconds for the portal to load all notifications
                                 if (webView != null) {
                                     webView.loadUrl(
                                             "javascript: {alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text())}"
@@ -161,6 +162,7 @@ public class NotificationService extends JobIntentService {
 
     @SuppressLint("ApplySharedPref")
     private void parseNotification(String newMsg) {
+        prefs.edit().putString(PREF_NOTIFICATIONS_KEY, "").commit();
         if (prefs.contains(PREF_NOTIFICATIONS_KEY) &&
                 !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
                 !newMsg.contentEquals(prefs.getString(PREF_NOTIFICATIONS_KEY, ""))) {

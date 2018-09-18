@@ -264,7 +264,8 @@ public class MainActivity extends AppCompatActivity
         webView.onResume();
 
         // check for any new notice
-        NoticeCheckJobIntentService.startActionCheckNotice(this);
+        NoticeCheckJobIntentService.enqueue(this);
+        NotificationService.enqueue(this);
 
         if (!TextUtils.isEmpty(getIntent().getStringExtra(EXTRA_PRELOAD_URL))) {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
@@ -380,10 +381,6 @@ public class MainActivity extends AppCompatActivity
                 } catch (android.content.ActivityNotFoundException ignored) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
                 }
-                break;
-
-            case R.id.nav_check_notification:
-                NotificationService.enqueue(this);
                 break;
         }
 

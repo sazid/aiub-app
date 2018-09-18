@@ -28,7 +28,7 @@ public class NoticeCheckJobIntentService extends JobIntentService {
     private static final String PREF_NOTICES_KEY = "PREF_NOTICES_KEY";
 
 
-    public static void startActionCheckNotice(Context context) {
+    public static void enqueue(Context context) {
         Intent intent = new Intent(context, NoticeCheckJobIntentService.class);
         enqueueWork(context, NoticeCheckJobIntentService.class, 1, intent);
 //        ContextCompat.startForegroundService(context, intent);
