@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -46,6 +47,8 @@ import io.fabric.sdk.android.Fabric;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdvancedWebView.Listener {
 
+    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 5469;
+
     public static final String EXTRA_PRELOAD_URL = "EXTRA_PRELOAD_URL";
     public static final String WRONG_DETAILS_MSG = "Wrong username/password!";
 
@@ -69,6 +72,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
+
+        checkPermission();
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // check if username or password is stored
@@ -253,7 +259,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        webView.onActivityResult(requestCode, resultCode, data);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
+                if (!Settings.canDrawOverlays(this)) {
+                    // You don't have permission
+                    toast("Please enable overlay/draw on top permission");
+                    checkPermission();
+                }
+            }
+        } else {
+            webView.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -385,6 +405,16 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         drawer.setSelected(false);
         return true;
+    }
+
+    public void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+            }
+        }
     }
 
     private void logout() {
