@@ -168,9 +168,11 @@ public class NotificationService extends JobIntentService {
     private void parseNotification(String newMsg) {
         Log.d("NOTIFICATION", prefs.getString(PREF_NOTIFICATIONS_KEY, ""));
 
+        String storedMsg = prefs.getString(PREF_NOTIFICATIONS_KEY, "");
         if (prefs.contains(PREF_NOTIFICATIONS_KEY) &&
+                newMsg.length() > storedMsg.length() &&
                 !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
-                !newMsg.contentEquals(prefs.getString(PREF_NOTIFICATIONS_KEY, ""))) {
+                !newMsg.contentEquals(storedMsg)) {
             postNewNoticeNotification();
         }
 
