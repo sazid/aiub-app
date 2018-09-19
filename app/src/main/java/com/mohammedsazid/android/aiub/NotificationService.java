@@ -2,7 +2,6 @@ package com.mohammedsazid.android.aiub;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -262,15 +261,19 @@ public class NotificationService extends JobIntentService {
     public void onDestroy() {
         super.onDestroy();
 
-        if (webView != null) {
-            webView.onDestroy();
-        }
+        try {
+            if (webView != null) {
+                webView.onDestroy();
+            }
 
-        // clean up resources
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        if (wm != null && webView != null) {
-            wm.removeView(webView);
-            webView = null;
+            // clean up resources
+            WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            if (wm != null && webView != null) {
+                wm.removeView(webView);
+                webView = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
