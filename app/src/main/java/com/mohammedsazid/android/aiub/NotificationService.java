@@ -2,6 +2,7 @@ package com.mohammedsazid.android.aiub;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -57,7 +58,8 @@ public class NotificationService extends JobIntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(this, "Notification Service")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(android.R.drawable.stat_notify_sync)
+                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Checking for new notifications");
 
@@ -114,6 +116,9 @@ public class NotificationService extends JobIntentService {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
+                if (webView == null)
+                    return;
+
                 switch (webView.getUrl()) {
                     case "https://portal.aiub.edu/Student":
                     case "https://portal.aiub.edu/Student/":
@@ -131,7 +136,7 @@ public class NotificationService extends JobIntentService {
                                             "javascript: {alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text())}"
                                     );
                                 }
-                            }, 10000);
+                            }, 5000);
                         } catch (Exception ignored) {
                         }
                         break;
@@ -255,10 +260,18 @@ public class NotificationService extends JobIntentService {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+
         if (webView != null) {
+            webView.onDestroy();
+        }
+
+        // clean up resources
+        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        if (wm != null && webView != null) {
+            wm.removeView(webView);
             webView = null;
         }
-        super.onDestroy();
     }
 
     private String getPassword() {
@@ -279,13 +292,6 @@ public class NotificationService extends JobIntentService {
             // try for 90 seconds
             while (!SHOULD_STOP && tries++ < 90) {
                 Thread.sleep(1000);
-            }
-
-            // clean up resources
-            WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-            if (wm != null && webView != null) {
-                wm.removeView(webView);
-                webView = null;
             }
         } catch (Exception ignored) {
         }

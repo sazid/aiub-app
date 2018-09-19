@@ -64,7 +64,8 @@ public class NoticeCheckJobIntentService extends JobIntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(this, "Notice Service")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(android.R.drawable.stat_notify_sync)
+                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Checking for new notices");
 
