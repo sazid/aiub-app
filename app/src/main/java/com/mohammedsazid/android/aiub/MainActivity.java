@@ -41,7 +41,15 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.mohammedsazid.android.aiub.workers.NoticeWorker;
+import com.mohammedsazid.android.aiub.workers.PortalNotificationWorker;
 
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 import io.fabric.sdk.android.Fabric;
 
 
@@ -119,6 +127,8 @@ public class MainActivity extends AppCompatActivity
         navUsername.setText(getUsername());
 
         initAd();
+
+        scheduleWork();
     }
 
     private void initAd() {
@@ -127,6 +137,25 @@ public class MainActivity extends AppCompatActivity
                 .addTestDevice("2A7E924579ED23D7D38EC8451A9568B0")
                 .build();
         mAdView.loadAd(adRequest);
+    }
+
+    private void scheduleWork() {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest noticeWork =
+                new PeriodicWorkRequest.Builder(NoticeWorker.class, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+                        .setConstraints(constraints)
+                        .build();
+
+        PeriodicWorkRequest portalNotificationWorker =
+                new PeriodicWorkRequest.Builder(PortalNotificationWorker.class, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+                        .setConstraints(constraints)
+                        .build();
+
+        WorkManager.getInstance().enqueue(noticeWork);
+        WorkManager.getInstance().enqueue(portalNotificationWorker);
     }
 
     private void bindViews() {
@@ -202,7 +231,9 @@ public class MainActivity extends AppCompatActivity
 
             try {
                 try {
-                    dm.enqueue(request);
+                    if (dm != null) {
+                        dm.enqueue(request);
+                    }
                 } catch (SecurityException e) {
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
                     dm.enqueue(request);
@@ -278,8 +309,8 @@ public class MainActivity extends AppCompatActivity
         webView.onResume();
 
         // check for any new notice
-        NoticeCheckJobIntentService.enqueue(this);
-        NotificationService.enqueue(this);
+//        NoticeCheckJobIntentService.enqueue(this);
+//        NotificationService.enqueue(this);
 
         if (!TextUtils.isEmpty(getIntent().getStringExtra(EXTRA_PRELOAD_URL))) {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
