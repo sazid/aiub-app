@@ -102,6 +102,7 @@ public class NotificationService extends JobIntentService {
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
                 if (message.startsWith(NOTIFICATIONS_MSG)) {
                     parseNotification(message);
+                    return true;
                 } else if (message.contentEquals(WRONG_DETAILS_MSG)) {
                     SHOULD_STOP = true;
                     return true;
@@ -126,16 +127,22 @@ public class NotificationService extends JobIntentService {
                         break;
                     case "https://portal.aiub.edu/Student/Notification":
                     case "https://portal.aiub.edu/Student/Notification/":
-                        Log.d("NotificationService", "Loaded notifications");
+                        Log.d("NotificationService", "Loading notifications");
                         try {
                             new Handler(getMainLooper()).postDelayed(() -> {
-                                // wait at least 10 seconds for the portal to load all notifications
                                 if (webView != null) {
                                     webView.loadUrl(
-                                            "javascript: {alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text())}"
+                                            "javascript: {\n" +
+                                                "var loadDetector = setInterval(function() {\n" +
+                                                "   if ($('#dvLoading').css('display') === 'none') {\n" +
+                                                "       alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text());\n" +
+                                                "       clearInterval(loadDetector);\n" +
+                                                "   }\n" +
+                                                "}, 100);\n" +
+                                            "}"
                                     );
                                 }
-                            }, 5000);
+                            }, 500);
                         } catch (Exception ignored) {
                         }
                         break;
@@ -166,6 +173,7 @@ public class NotificationService extends JobIntentService {
 
     @SuppressLint("ApplySharedPref")
     private void parseNotification(String newMsg) {
+        Log.d("NOTIFICATION", "Notifications loaded via js callback");
         Log.d("NOTIFICATION", prefs.getString(PREF_NOTIFICATIONS_KEY, ""));
 
         String storedMsg = prefs.getString(PREF_NOTIFICATIONS_KEY, "");
