@@ -102,10 +102,8 @@ public class NotificationService extends JobIntentService {
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
                 if (message.startsWith(NOTIFICATIONS_MSG)) {
                     parseNotification(message);
-                    return true;
                 } else if (message.contentEquals(WRONG_DETAILS_MSG)) {
                     SHOULD_STOP = true;
-                    return true;
                 }
 
                 return super.onJsAlert(view, url, message, result);
