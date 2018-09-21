@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -66,6 +67,13 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
 
             Log.d(javaClass.simpleName, prefs?.getString(PREF_NOTIFICATIONS_KEY, "") ?: "")
             Log.d(javaClass.simpleName, "doWork done")
+
+            // remove the webview from window manager
+            postDelayed(looper = Looper.getMainLooper()) {
+                val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                wm.removeView(webView)
+                webView = null
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             fail("Failed in doWork()")
