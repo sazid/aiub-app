@@ -18,10 +18,10 @@
             android:icon="@drawable/ic_home"
             android:title="AIUB Home" />
 
-        <item
-            android:id="@+id/nav_clubs"
-            android:icon="@drawable/ic_clubs"
-            android:title="Clubs" />
+        <!--<item-->
+        <!--android:id="@+id/nav_clubs"-->
+        <!--android:icon="@drawable/ic_clubs"-->
+        <!--android:title="Clubs" />-->
 
         <item
             android:id="@+id/nav_news"
@@ -54,6 +54,7 @@
         <item
             android:id="@+id/nav_other_apps"
             android:checkable="false"
+            android:icon="@drawable/ic_apps"
             android:title="Other Apps" />
 
     </group>
