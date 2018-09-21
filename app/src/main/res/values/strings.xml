@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AIUB</string>
+    <string name="app_name">AIUBian</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -13,6 +13,6 @@
         \nMohammed Sazid Al Rashid
         \nID: 17-33330-1
         \nhttps://github.com/sazid/
-        \nhttps://szore.blogspot.com/
+        \nhttps://sazid.github.io/
     </string>
 </resources>

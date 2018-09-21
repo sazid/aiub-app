@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
