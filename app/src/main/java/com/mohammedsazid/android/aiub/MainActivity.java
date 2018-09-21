@@ -1,5 +1,6 @@
 package com.mohammedsazid.android.aiub;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private ProgressBar progressBar;
+    @SuppressWarnings("FieldCanBeLocal")
     private AdView mAdView;
 
     private CustomWebView webView;
@@ -75,6 +77,19 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences prefs;
 
     private boolean isLoading = false;
+
+    @SuppressLint("NewApi")
+    private static void openAppSettings(final Context context, final String packageName) {
+        try {
+            final Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + packageName));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            context.startActivity(intent);
+
+        } catch (Exception ignored) {
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,7 +199,7 @@ public class MainActivity extends AppCompatActivity
         if (url.contentEquals("https://portal.aiub.edu/") || url.startsWith("https://portal.aiub.edu/Login")) {
             String FIELD_USERNAME_ID = "username";
             String FIELD_PASSWORD_ID = "password";
-//                    String FIELD_LOGIN_BUTTON_ID = "login";
+//            String FIELD_LOGIN_BUTTON_ID = "login";
 
             String jsScript =
                     "if ($('.text-danger').length !== 0) {" +
@@ -248,21 +263,18 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (SecurityException e) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    Toast.makeText(this, "Please enable STORAGE permission!",
-                            Toast.LENGTH_LONG).show();
-                    AdvancedWebView.openAppSettings(this, getPackageName());
+                    toast("Please enable STORAGE permission!");
+                    openAppSettings(this, getPackageName());
                 }
 
-                return;
             }
             // if the download manager app has been disabled on the device
             catch (IllegalArgumentException e) {
                 // show the settings screen where the user can enable the download manager app again
-                AdvancedWebView.openAppSettings(this, AdvancedWebView.PACKAGE_NAME_DOWNLOAD_MANAGER);
-                return;
+                openAppSettings(this, AdvancedWebView.PACKAGE_NAME_DOWNLOAD_MANAGER);
             }
 
-            Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
+//            toast("Downloading File");
         });
     }
 
@@ -540,8 +552,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
             if (message.contentEquals(WRONG_DETAILS_MSG)) {
-                Toast.makeText(MainActivity.this,
-                        WRONG_DETAILS_MSG, Toast.LENGTH_SHORT).show();
+                toast(WRONG_DETAILS_MSG);
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();
                 return true;
