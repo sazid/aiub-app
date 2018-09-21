@@ -25,11 +25,13 @@ class NoticeWorker(context: Context, params: WorkerParameters)
 
     private val PREF_NOTICES_KEY = "PREF_NOTICES_KEY"
 
+    private var workerResult = Result.SUCCESS
+
     override fun doWork(): Result {
         Log.d(javaClass.simpleName, "doWork for NoticeWorker")
         parseNoticeHTML("http://www.aiub.edu/category/notices")
-        Log.d(javaClass.simpleName, "doWork for NoticeWorker")
-        return Result.SUCCESS
+        Log.d(javaClass.simpleName, "NoticeWorker done")
+        return workerResult
     }
 
     @TargetApi(26)
@@ -105,6 +107,7 @@ class NoticeWorker(context: Context, params: WorkerParameters)
                     .apply()
         } catch (e: Exception) {
             e.printStackTrace()
+            workerResult = Result.FAILURE
 //            Crashlytics.logException(e)
         }
 

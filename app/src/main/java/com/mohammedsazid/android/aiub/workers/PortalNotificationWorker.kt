@@ -66,7 +66,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
             }
 
             Log.d(javaClass.simpleName, prefs?.getString(PREF_NOTIFICATIONS_KEY, "") ?: "")
-            Log.d(javaClass.simpleName, "doWork done")
+            Log.d(javaClass.simpleName, "PortalNotificationWorker done")
 
             // remove the webview from window manager
             postDelayed(looper = Looper.getMainLooper()) {
@@ -162,7 +162,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                     return
                 }
 
-                when (webView?.url) {
+                when (url) {
                     "https://portal.aiub.edu/Student", "https://portal.aiub.edu/Student/" -> {
                         webView?.loadUrl("https://portal.aiub.edu/Student/Notification")
                     }
