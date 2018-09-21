@@ -28,7 +28,7 @@ import androidx.work.WorkerParameters
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
-import com.mohammedsazid.android.aiub.CustomWebView
+import com.mohammedsazid.android.aiub.widgets.CustomWebView
 import com.mohammedsazid.android.aiub.MainActivity
 import com.mohammedsazid.android.aiub.R
 

@@ -39,8 +39,9 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.mohammedsazid.android.aiub.widgets.AdvancedWebView;
+import com.mohammedsazid.android.aiub.widgets.CustomWebView;
 import com.mohammedsazid.android.aiub.workers.NoticeWorker;
 import com.mohammedsazid.android.aiub.workers.PortalNotificationWorker;
 
@@ -314,10 +315,6 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         webView.onResume();
-
-        // check for any new notice
-//        NoticeCheckJobIntentService.enqueue(this);
-//        NotificationService.enqueue(this);
 
         if (!TextUtils.isEmpty(getIntent().getStringExtra(EXTRA_PRELOAD_URL))) {
             webView.loadUrl(getIntent().getStringExtra(EXTRA_PRELOAD_URL));
