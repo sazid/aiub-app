@@ -146,14 +146,21 @@ public class MainActivity extends AppCompatActivity
 
         PeriodicWorkRequest noticeWork =
                 new PeriodicWorkRequest.Builder(NoticeWorker.class, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+                        .addTag("NoticeWorker")
                         .setConstraints(constraints)
                         .build();
 
         PeriodicWorkRequest portalNotificationWorker =
                 new PeriodicWorkRequest.Builder(PortalNotificationWorker.class, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+                        .addTag("PortalNotificationWorker")
                         .setConstraints(constraints)
                         .build();
 
+        // cancel any pending work
+        WorkManager.getInstance().cancelAllWorkByTag("NoticeWorker");
+        WorkManager.getInstance().cancelAllWorkByTag("PortalNotificationWorker");
+
+        // enqueue new work
         WorkManager.getInstance().enqueue(noticeWork);
         WorkManager.getInstance().enqueue(portalNotificationWorker);
     }

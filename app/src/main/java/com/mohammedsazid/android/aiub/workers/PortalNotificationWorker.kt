@@ -11,6 +11,8 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
+import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.text.TextUtils
 import android.util.Log
@@ -29,7 +31,6 @@ import com.crashlytics.android.answers.CustomEvent
 import com.mohammedsazid.android.aiub.CustomWebView
 import com.mohammedsazid.android.aiub.MainActivity
 import com.mohammedsazid.android.aiub.R
-import java.util.concurrent.TimeUnit
 
 class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     : Worker(context, parameters) {
@@ -39,36 +40,61 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     private val PREF_NOTIFICATIONS_KEY = "PREF_NOTIFICATIONS_KEY"
 
     private var webView: CustomWebView? = null
-    private var prefs: SharedPreferences? = null
+    private var prefs: SharedPreferences? = PreferenceManager
+            .getDefaultSharedPreferences(applicationContext)
     private var workResult = Result.SUCCESS
-
-    private val lock = java.lang.Object()
+    private var shouldStop = false
 
     override fun doWork(): Result {
-        createAndAttachView(applicationContext)
-        Log.d(javaClass.simpleName, "doWork for PortalNotification")
-        lock.wait(TimeUnit.SECONDS.toMillis(90))
+        var tries = 0
 
-        Log.d(javaClass.simpleName, prefs?.getString(PREF_NOTIFICATIONS_KEY, ""))
-        Log.d(javaClass.simpleName, "doWork done")
+        try {
+            Log.d(javaClass.simpleName, "doWork for PortalNotification")
+
+            postDelayed(looper = Looper.getMainLooper()) {
+                createAndAttachView(applicationContext)
+            }
+
+            while (!shouldStop && ++tries <= 90) {
+                Log.d(javaClass.simpleName, "Trying $tries")
+                Thread.sleep(1000)
+            }
+
+            if (tries > 90) {
+                workResult = Result.FAILURE
+            }
+
+            Log.d(javaClass.simpleName, prefs?.getString(PREF_NOTIFICATIONS_KEY, "") ?: "")
+            Log.d(javaClass.simpleName, "doWork done")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            fail("Failed in doWork()")
+        }
 
         return workResult
     }
 
-    fun postDelayed(delay: Long, cb: () -> Unit) {
-        Handler().postDelayed({
-            cb()
-        }, delay)
+    fun postDelayed(delay: Long = 0L, looper: Looper = Looper.myLooper(), cb: () -> Unit) {
+        if (delay == 0L) {
+            Handler(looper).post {
+                cb()
+            }
+        } else {
+            Handler(looper).postDelayed({
+                cb()
+            }, delay)
+        }
     }
 
     private fun success() {
         workResult = Result.SUCCESS
-        lock.notifyAll()
+        shouldStop = true
     }
 
-    private fun fail() {
+    private fun fail(msg: String) {
+        Log.d(javaClass.simpleName, "Failed with reason: $msg")
         workResult = Result.FAILURE
-        lock.notifyAll()
+        shouldStop = true
     }
 
 //    private fun retry() {
@@ -105,22 +131,26 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
         webView = CustomWebView(applicationContext)
         webView?.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
+                Log.d(javaClass.simpleName, "Inside onJsAlert")
+
                 if (message.startsWith(NOTIFICATIONS_MSG)) {
                     parseNotification(message)
                     success()
+                    return super.onJsAlert(view, url, message, result)
                 } else if (message.contentEquals(WRONG_DETAILS_MSG)) {
                 }
 
-                fail()
+                fail("Failed onJsAlert")
                 return super.onJsAlert(view, url, message, result)
             }
         }
         webView?.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
+                Log.d(javaClass.simpleName, "onPageFinished")
 
                 if (webView == null) {
-                    fail()
+                    fail("webView is null inside onPageFinished")
                     return
                 }
 
@@ -129,7 +159,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                         webView?.loadUrl("https://portal.aiub.edu/Student/Notification")
                     }
                     "https://portal.aiub.edu/Student/Notification", "https://portal.aiub.edu/Student/Notification/" -> {
-                        postDelayed(500) {
+                        postDelayed(delay = 500) {
                             webView?.loadUrl(
                                     "javascript: {\n" +
                                             "var loadDetector = setInterval(function() {\n" +
@@ -148,7 +178,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                     else -> {
                         // not supported
                         Crashlytics.log(1, "Unsupported URL", webView?.url)
-                        fail()
+                        fail("Unknown url")
                     }
                 }
             }
@@ -158,7 +188,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
             wm.addView(webView, params)
         } catch (e: Exception) {
             e.printStackTrace()
-            fail()
+            fail("Failed to add view to WindowManager")
             return
         }
 
@@ -166,6 +196,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     }
 
     private fun parseNotification(newMsg: String) {
+        Log.d(javaClass.simpleName, "Parsing notification")
         try {
             val storedMsg = prefs?.getString(PREF_NOTIFICATIONS_KEY, "")
             if (prefs!!.contains(PREF_NOTIFICATIONS_KEY) &&
@@ -182,11 +213,12 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
             success()
         } catch (e: Exception) {
             e.printStackTrace()
-            fail()
+            fail("Failed to parse notification")
         }
     }
 
     private fun postNewNoticeNotification() {
+        Log.d(javaClass.simpleName, "Post new notification")
         val i = Intent(applicationContext, MainActivity::class.java)
         i.putExtra(MainActivity.EXTRA_PRELOAD_URL, "https://portal.aiub.edu/")
 
@@ -217,6 +249,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     @TargetApi(26)
     @Synchronized
     private fun createChannel(channelId: String, importance: Int) {
+        Log.d(javaClass.simpleName, "Creating channel")
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
 
         val mChannel = NotificationChannel(
@@ -229,11 +262,12 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
         if (manager != null) {
             manager.createNotificationChannel(mChannel)
         } else {
-            fail()
+            fail("Failed to create notification channel")
         }
     }
 
     private fun login(view: WebView, url: String) {
+        Log.d(javaClass.simpleName, "Logging in")
         val username = getUsername()
         val password = getPassword()
 
@@ -253,7 +287,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                     "}"
 
 
-            postDelayed(500) {
+            postDelayed(delay = 500) {
                 view.loadUrl("javascript: {$jsScript};")
             }
         }
