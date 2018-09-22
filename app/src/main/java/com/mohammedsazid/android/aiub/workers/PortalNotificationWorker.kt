@@ -70,9 +70,13 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
 
             // remove the webview from window manager
             postDelayed(looper = Looper.getMainLooper()) {
-                val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                wm.removeView(webView)
-                webView = null
+                try {
+                    val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                    wm.removeView(webView)
+                    webView = null
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
