@@ -291,7 +291,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                     "} else {" +
                     "$('#$fieldUsernameId').val('$username');" +
                     "$('#$fieldPasswordId').val('$password');" +
-                    "$('button').first().click();" +
+                    "$('button[type=submit]:contains(\"Log In\")').click();" +
                     "}"
 
 
