@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var mAdView: AdView? = null
     private var overlay: ConstraintLayout? = null
     private var appbar: View? = null
+    private var loginTv: TextView? = null
 
     private var webView: CustomWebView? = null
     private var webChromeClient: CustomWebChromeClient? = null
@@ -165,6 +166,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBar = findViewById(R.id.progressBar)
         overlay = findViewById(R.id.overlay)
         appbar = findViewById(R.id.appbar)
+        loginTv = findViewById(R.id.loginTextView)
+
+        postDelayed(delay = 3000) {
+            loginTv?.setText("Hmmm... it's taking longer than expected :/")
+        }
+
+        postDelayed(delay = 7000) {
+            loginTv?.setText("Are you sure your network is ok?")
+        }
+
+        postDelayed(delay = 10000) {
+            loginTv?.setText(":(")
+        }
     }
 
     private fun removeOverlay() {
