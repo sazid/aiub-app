@@ -3,10 +3,12 @@ package com.mohammedsazid.android.aiub
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.*
+import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
 import android.provider.Settings
+import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var drawer: DrawerLayout? = null
     private var progressBar: ProgressBar? = null
     private var mAdView: AdView? = null
+    private var overlay: ConstraintLayout? = null
 
     private var webView: CustomWebView? = null
     private var webChromeClient: CustomWebChromeClient? = null
@@ -63,6 +66,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
         setContentView(R.layout.activity_main)
+        window.decorView.setBackgroundColor(Color.WHITE)
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -160,6 +164,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         navigationView = findViewById(R.id.nav_view)
         webView = findViewById(R.id.web_view)
         progressBar = findViewById(R.id.progressBar)
+        overlay = findViewById(R.id.overlay)
+    }
+
+    private fun removeOverlay() {
+        overlay?.visibility = View.GONE
+        toolbar?.visibility = View.VISIBLE
     }
 
     private fun login(view: WebView, url: String) {
@@ -192,7 +202,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         webView?.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
-                login(view, url)
+
+                when (url) {
+                    "https://portal.aiub.edu/Student", "https://portal.aiub.edu/Student/" -> {
+                        removeOverlay()
+                    }
+                    else -> {
+                        login(view, url)
+                    }
+                }
             }
         }
 
