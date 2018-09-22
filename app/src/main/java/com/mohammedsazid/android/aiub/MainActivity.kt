@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var progressBar: ProgressBar? = null
     private var mAdView: AdView? = null
     private var overlay: ConstraintLayout? = null
+    private var appbar: View? = null
 
     private var webView: CustomWebView? = null
     private var webChromeClient: CustomWebChromeClient? = null
@@ -165,11 +166,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         webView = findViewById(R.id.web_view)
         progressBar = findViewById(R.id.progressBar)
         overlay = findViewById(R.id.overlay)
+        appbar = findViewById(R.id.appbar)
     }
 
     private fun removeOverlay() {
         overlay?.visibility = View.GONE
-        toolbar?.visibility = View.VISIBLE
+        appbar?.visibility = View.VISIBLE
     }
 
     private fun login(view: WebView, url: String) {
