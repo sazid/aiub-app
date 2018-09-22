@@ -3,7 +3,6 @@ package com.mohammedsazid.android.aiub
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.*
-import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
@@ -18,9 +17,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.webkit.*
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -66,8 +63,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Fabric.with(this, Crashlytics())
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         setContentView(R.layout.activity_main)
-        window.decorView.setBackgroundColor(Color.WHITE)
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -170,8 +168,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun removeOverlay() {
-        overlay?.visibility = View.GONE
-        appbar?.visibility = View.VISIBLE
+        postDelayed {
+            overlay?.visibility = View.GONE
+            appbar?.visibility = View.VISIBLE
+        }
     }
 
     private fun login(view: WebView, url: String) {
