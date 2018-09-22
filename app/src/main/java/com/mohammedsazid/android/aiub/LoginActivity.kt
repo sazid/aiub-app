@@ -3,6 +3,7 @@ package com.mohammedsazid.android.aiub
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
@@ -17,6 +18,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        window.decorView.setBackgroundColor(Color.WHITE)
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         saveBtn.setOnClickListener(this)
