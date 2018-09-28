@@ -22,10 +22,7 @@ import android.webkit.*
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
+import androidx.work.*
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
@@ -307,6 +304,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         webView?.onResume()
 
         if (!TextUtils.isEmpty(intent.getStringExtra(EXTRA_PRELOAD_URL))) {
+            removeOverlay()
             webView?.loadUrl(intent.getStringExtra(EXTRA_PRELOAD_URL))
             intent.putExtra(EXTRA_PRELOAD_URL, "")
         }

@@ -60,23 +60,20 @@ class NoticeWorker(context: Context, params: WorkerParameters)
                     .connect(url)
                     .timeout(60 * 1000)
                     .get()
-            val eventList = doc.getElementsByClass("event-list").first()
 
-            val sb = StringBuilder()
-
-            for (el in eventList.children()) {
-                sb.append(DatabaseUtils.sqlEscapeString(
-                        el.getElementsByTag("h2").first().text())
-                )
-            }
+            val sb = doc.select(".event-list > li > time > .day").text().trim()
 
             val prefs = PreferenceManager
                     .getDefaultSharedPreferences(applicationContext)
 
             if (prefs.contains(PREF_NOTICES_KEY) &&
+                    !sb.isEmpty() &&
                     !prefs.getString(PREF_NOTICES_KEY, "")!!.contentEquals(sb)) {
                 val i = Intent(applicationContext, MainActivity::class.java)
                 i.putExtra(MainActivity.EXTRA_PRELOAD_URL, url)
+
+                Log.d("NOTICE", prefs.getString(PREF_NOTICES_KEY, ""))
+                Log.d("NOTICE", sb)
 
                 val pi = PendingIntent.getActivity(
                         applicationContext, 1, i, 0)
@@ -100,11 +97,15 @@ class NoticeWorker(context: Context, params: WorkerParameters)
 
                 Answers.getInstance().logCustom(
                         CustomEvent("Notice notified"))
-            }
 
-            prefs.edit()
-                    .putString(PREF_NOTICES_KEY, sb.toString())
-                    .apply()
+                prefs.edit()
+                        .putString(PREF_NOTICES_KEY, sb)
+                        .apply()
+            } else if (!prefs.contains(PREF_NOTICES_KEY)) {
+                prefs.edit()
+                        .putString(PREF_NOTICES_KEY, sb)
+                        .apply()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             workerResult = Result.FAILURE

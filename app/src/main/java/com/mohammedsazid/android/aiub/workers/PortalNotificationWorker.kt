@@ -146,8 +146,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                 Log.d(javaClass.simpleName, "Inside onJsAlert")
 
                 if (message.startsWith(NOTIFICATIONS_MSG)) {
-                    parseNotification(message)
-                    success()
+                    parseNotification(message.trim())
                     return super.onJsAlert(view, url, message, result)
                 } else if (message.contentEquals(WRONG_DETAILS_MSG)) {
                 }
@@ -210,17 +209,22 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     private fun parseNotification(newMsg: String) {
         Log.d(javaClass.simpleName, "Parsing notification")
         try {
-            val storedMsg = prefs?.getString(PREF_NOTIFICATIONS_KEY, "")
+            val storedMsg = prefs?.getString(PREF_NOTIFICATIONS_KEY, "")?.trim()
+
             if (prefs!!.contains(PREF_NOTIFICATIONS_KEY) &&
                     newMsg.length > storedMsg!!.length &&
                     !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
                     !newMsg.contentEquals(storedMsg)) {
                 postNewNoticeNotification()
-            }
 
-            prefs!!.edit()
-                    ?.putString(PREF_NOTIFICATIONS_KEY, newMsg)
-                    ?.apply()
+                prefs!!.edit()
+                        ?.putString(PREF_NOTIFICATIONS_KEY, newMsg)
+                        ?.apply()
+            } else if (!prefs!!.contains(PREF_NOTIFICATIONS_KEY)) {
+                prefs!!.edit()
+                        ?.putString(PREF_NOTIFICATIONS_KEY, newMsg)
+                        ?.apply()
+            }
 
             success()
         } catch (e: Exception) {
