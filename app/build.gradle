@@ -20,13 +20,13 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.mohammedsazid.android.aiub"
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 22
-        versionName "2.2.6"
+        versionCode 23
+        versionName "2.2.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
