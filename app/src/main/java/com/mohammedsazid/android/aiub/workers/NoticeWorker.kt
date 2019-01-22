@@ -16,14 +16,16 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
+import com.mohammedsazid.android.aiub.DiffViewer
 import com.mohammedsazid.android.aiub.MainActivity
 import com.mohammedsazid.android.aiub.R
+import com.mohammedsazid.android.aiub.computeHash
 import org.jsoup.Jsoup
 
 class NoticeWorker(context: Context, params: WorkerParameters)
     : Worker(context, params) {
 
-    private val PREF_NOTICES_KEY = "PREF_NOTICES_KEY"
+    private val PREF_NOTICES_KEY = "PREF_NOTICES_HASH_KEY"
 
     private var workerResult = Result.SUCCESS
 
@@ -62,18 +64,30 @@ class NoticeWorker(context: Context, params: WorkerParameters)
                     .get()
 
             val sb = doc.select(".event-list > li > time > .day").text().trim()
+            val newNoticeHash = computeHash(sb)
+
+            Log.d("HASH", newNoticeHash.toString())
 
             val prefs = PreferenceManager
                     .getDefaultSharedPreferences(applicationContext)
 
-            if (prefs.contains(PREF_NOTICES_KEY) &&
-                    !sb.isEmpty() &&
-                    !prefs.getString(PREF_NOTICES_KEY, "")!!.contentEquals(sb)) {
+            val intent = Intent(applicationContext, DiffViewer::class.java)
+            intent.putExtra("PREF_STRING", prefs.getLong(PREF_NOTICES_KEY, 0L).toString())
+            intent.putExtra("NOTI_STRING", newNoticeHash.toString())
+            intent.putExtra("TITLE", "Notice worker")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            applicationContext.startActivity(intent)
+
+            if (
+                    prefs.contains(PREF_NOTICES_KEY) &&
+                    newNoticeHash != 0L &&
+                    prefs.getLong(PREF_NOTICES_KEY, 0L) != newNoticeHash
+            ) {
                 val i = Intent(applicationContext, MainActivity::class.java)
                 i.putExtra(MainActivity.EXTRA_PRELOAD_URL, url)
-
-                Log.d("NOTICE", prefs.getString(PREF_NOTICES_KEY, ""))
-                Log.d("NOTICE", sb)
+//
+//                Log.d("NOTICE", prefs.getLong(PREF_NOTICES_KEY, 0L).toString())
+//                Log.d("NOTICE", sb)
 
                 val pi = PendingIntent.getActivity(
                         applicationContext, 1, i, 0)
@@ -99,11 +113,11 @@ class NoticeWorker(context: Context, params: WorkerParameters)
                         CustomEvent("Notice notified"))
 
                 prefs.edit()
-                        .putString(PREF_NOTICES_KEY, sb)
+                        .putLong(PREF_NOTICES_KEY, newNoticeHash)
                         .apply()
             } else if (!prefs.contains(PREF_NOTICES_KEY)) {
                 prefs.edit()
-                        .putString(PREF_NOTICES_KEY, sb)
+                        .putLong(PREF_NOTICES_KEY, newNoticeHash)
                         .apply()
             }
         } catch (e: Exception) {

@@ -29,16 +29,18 @@ import androidx.work.WorkerParameters
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
+import com.mohammedsazid.android.aiub.DiffViewer
 import com.mohammedsazid.android.aiub.widgets.CustomWebView
 import com.mohammedsazid.android.aiub.MainActivity
 import com.mohammedsazid.android.aiub.R
+import com.mohammedsazid.android.aiub.computeHash
 
 class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     : Worker(context, parameters) {
 
     val WRONG_DETAILS_MSG = "Wrong username/password!"
     val NOTIFICATIONS_MSG = "NOTIFICATIONS:"
-    private val PREF_NOTIFICATIONS_KEY = "PREF_NOTIFICATIONS_KEY"
+    private val PREF_NOTIFICATIONS_KEY = "PREF_NOTIFICATIONS_HASH_KEY"
 
     private var webView: CustomWebView? = null
     private var prefs: SharedPreferences? = PreferenceManager
@@ -65,7 +67,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                 workResult = Result.FAILURE
             }
 
-            Log.d(javaClass.simpleName, prefs?.getString(PREF_NOTIFICATIONS_KEY, "") ?: "")
+            Log.d(javaClass.simpleName, prefs?.getLong(PREF_NOTIFICATIONS_KEY, 0).toString())
             Log.d(javaClass.simpleName, "PortalNotificationWorker done")
 
             // remove the webview from window manager
@@ -175,7 +177,8 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                                     "javascript: {\n" +
                                             "var loadDetector = setInterval(function() {\n" +
                                             "   if ($('#dvLoading').css('display') === 'none') {\n" +
-                                            "       alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-1 > small').text());\n" +
+                                            // select only first 5 items from the notification with their days
+                                            "       alert('" + NOTIFICATIONS_MSG + "' + $('div.col-md-2 > small').slice(0, 5).text().trim());\n" +
                                             "       clearInterval(loadDetector);\n" +
                                             "   }\n" +
                                             "}, 100);\n" +
@@ -184,7 +187,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                         }
                     }
                     "https://portal.aiub.edu/" -> {
-                        login(view, url)
+                        postDelayed(delay = 1000) { login(view, url) }
                     }
                     else -> {
                         // not supported
@@ -209,20 +212,31 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     private fun parseNotification(newMsg: String) {
         Log.d(javaClass.simpleName, "Parsing notification")
         try {
-            val storedMsg = prefs?.getString(PREF_NOTIFICATIONS_KEY, "")?.trim()
+            val storedMsgHash = prefs?.getLong(PREF_NOTIFICATIONS_KEY, 0L)
+            val newMsgHash = computeHash(newMsg.trim())
 
-            if (prefs!!.contains(PREF_NOTIFICATIONS_KEY) &&
-                    newMsg.length > storedMsg!!.length &&
-                    !newMsg.contentEquals(NOTIFICATIONS_MSG) &&
-                    !newMsg.contentEquals(storedMsg)) {
+            Log.d("HASH", newMsgHash.toString())
+
+            val intent = Intent(applicationContext, DiffViewer::class.java)
+            intent.putExtra("PREF_STRING", storedMsgHash.toString())
+            intent.putExtra("NOTI_STRING", newMsgHash.toString())
+            intent.putExtra("TITLE", "Portal Notification Worker")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            applicationContext.startActivity(intent)
+
+            if (
+                    prefs!!.contains(PREF_NOTIFICATIONS_KEY) &&
+                    newMsgHash != 0L &&
+                    newMsgHash != storedMsgHash
+            ) {
                 postNewNoticeNotification()
 
                 prefs!!.edit()
-                        ?.putString(PREF_NOTIFICATIONS_KEY, newMsg)
+                        ?.putLong(PREF_NOTIFICATIONS_KEY, newMsgHash)
                         ?.apply()
             } else if (!prefs!!.contains(PREF_NOTIFICATIONS_KEY)) {
                 prefs!!.edit()
-                        ?.putString(PREF_NOTIFICATIONS_KEY, newMsg)
+                        ?.putLong(PREF_NOTIFICATIONS_KEY, newMsgHash)
                         ?.apply()
             }
 

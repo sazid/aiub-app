@@ -125,11 +125,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .build()
 
         val noticeWork = PeriodicWorkRequest.Builder(NoticeWorker::class.java, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+//        val noticeWork = PeriodicWorkRequest.Builder(NoticeWorker::class.java, 1, TimeUnit.MINUTES, 1, TimeUnit.MINUTES)
                 .addTag("NoticeWorker")
                 .setConstraints(constraints)
                 .build()
 
         val portalNotificationWorker = PeriodicWorkRequest.Builder(PortalNotificationWorker::class.java, 1, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+//        val portalNotificationWorker = PeriodicWorkRequest.Builder(PortalNotificationWorker::class.java, 1, TimeUnit.MINUTES, 1, TimeUnit.MINUTES)
                 .addTag("PortalNotificationWorker")
                 .setConstraints(constraints)
                 .build()
