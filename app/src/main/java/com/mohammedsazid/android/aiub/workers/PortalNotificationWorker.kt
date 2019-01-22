@@ -187,11 +187,15 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
                         }
                     }
                     "https://portal.aiub.edu/" -> {
-                        postDelayed(delay = 1000) { login(view, url) }
+                        postDelayed(delay = 5000) { login(view, url) }
                     }
                     else -> {
                         // not supported
-                        Crashlytics.log(1, "Unsupported URL", webView?.url)
+                        try {
+                            Crashlytics.log(1, "Unsupported URL", webView?.url)
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
+                        }
                         fail("Unknown url")
                     }
                 }
@@ -308,14 +312,19 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
             val fieldUsernameId = "username"
             val fieldPasswordId = "password"
 
-            val jsScript = "if ($('.text-danger').length !== 0) {" +
-                    "window.alert('$WRONG_DETAILS_MSG');" +
-                    "} else {" +
-                    "$('#$fieldUsernameId').val('$username');" +
-                    "$('#$fieldPasswordId').val('$password');" +
-                    "$('button[type=submit]:contains(\"Log In\")').click();" +
+            val jsScript = "var loadDetector2 = setInterval(function() {\n" +
+                    "   if ($) {\n" +
+                    "      if ($('.text-danger').length !== 0) {" +
+                    "           window.alert('$WRONG_DETAILS_MSG');" +
+                    "       } else {" +
+                    "           $('#$fieldUsernameId').val('$username');" +
+                    "           $('#$fieldPasswordId').val('$password');" +
+                    "           $('button[type=submit]:contains(\"Log In\")').click();" +
+                    "       }"
+                    "       clearInterval(loadDetector2);\n" +
+                    "   }\n" +
+                    "}, 100);\n" +
                     "}"
-
 
             postDelayed(delay = 500) {
                 view.loadUrl("javascript: {$jsScript};")
