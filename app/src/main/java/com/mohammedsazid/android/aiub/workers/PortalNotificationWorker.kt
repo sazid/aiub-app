@@ -217,12 +217,12 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
 
             Log.d("HASH", newMsgHash.toString())
 
-            val intent = Intent(applicationContext, DiffViewer::class.java)
-            intent.putExtra("PREF_STRING", storedMsgHash.toString())
-            intent.putExtra("NOTI_STRING", newMsgHash.toString())
-            intent.putExtra("TITLE", "Portal Notification Worker")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            applicationContext.startActivity(intent)
+//            val intent = Intent(applicationContext, DiffViewer::class.java)
+//            intent.putExtra("PREF_STRING", storedMsgHash.toString())
+//            intent.putExtra("NOTI_STRING", newMsgHash.toString())
+//            intent.putExtra("TITLE", "Portal Notification Worker")
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            applicationContext.startActivity(intent)
 
             if (
                     prefs!!.contains(PREF_NOTIFICATIONS_KEY) &&

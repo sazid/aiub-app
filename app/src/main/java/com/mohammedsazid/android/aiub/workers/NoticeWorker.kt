@@ -71,12 +71,12 @@ class NoticeWorker(context: Context, params: WorkerParameters)
             val prefs = PreferenceManager
                     .getDefaultSharedPreferences(applicationContext)
 
-            val intent = Intent(applicationContext, DiffViewer::class.java)
-            intent.putExtra("PREF_STRING", prefs.getLong(PREF_NOTICES_KEY, 0L).toString())
-            intent.putExtra("NOTI_STRING", newNoticeHash.toString())
-            intent.putExtra("TITLE", "Notice worker")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            applicationContext.startActivity(intent)
+//            val intent = Intent(applicationContext, DiffViewer::class.java)
+//            intent.putExtra("PREF_STRING", prefs.getLong(PREF_NOTICES_KEY, 0L).toString())
+//            intent.putExtra("NOTI_STRING", newNoticeHash.toString())
+//            intent.putExtra("TITLE", "Notice worker")
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            applicationContext.startActivity(intent)
 
             if (
                     prefs.contains(PREF_NOTICES_KEY) &&
