@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         initAd()
 
-        scheduleWork()
+//        scheduleWork()
     }
 
     private fun initAd() {

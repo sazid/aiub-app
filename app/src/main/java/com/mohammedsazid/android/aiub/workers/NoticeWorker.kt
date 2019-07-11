@@ -27,7 +27,7 @@ class NoticeWorker(context: Context, params: WorkerParameters)
 
     private val PREF_NOTICES_KEY = "PREF_NOTICES_HASH_KEY"
 
-    private var workerResult = Result.SUCCESS
+    private var workerResult = Result.success()
 
     override fun doWork(): Result {
         Log.d(javaClass.simpleName, "doWork for NoticeWorker")
@@ -122,7 +122,7 @@ class NoticeWorker(context: Context, params: WorkerParameters)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            workerResult = Result.FAILURE
+            workerResult = Result.failure()
 //            Crashlytics.logException(e)
         }
 

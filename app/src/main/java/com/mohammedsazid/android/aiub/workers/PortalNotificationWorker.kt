@@ -45,7 +45,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     private var webView: CustomWebView? = null
     private var prefs: SharedPreferences? = PreferenceManager
             .getDefaultSharedPreferences(applicationContext)
-    private var workResult = Result.SUCCESS
+    private var workResult = Result.success()
     private var shouldStop = false
 
     override fun doWork(): Result {
@@ -64,7 +64,7 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
             }
 
             if (tries > 90) {
-                workResult = Result.FAILURE
+                workResult = Result.failure()
             }
 
             Log.d(javaClass.simpleName, prefs?.getLong(PREF_NOTIFICATIONS_KEY, 0).toString())
@@ -101,13 +101,13 @@ class PortalNotificationWorker(context: Context, parameters: WorkerParameters)
     }
 
     private fun success() {
-        workResult = Result.SUCCESS
+        workResult = Result.success()
         shouldStop = true
     }
 
     private fun fail(msg: String) {
         Log.d(javaClass.simpleName, "Failed with reason: $msg")
-        workResult = Result.FAILURE
+        workResult = Result.failure()
         shouldStop = true
     }
 
