@@ -7,14 +7,14 @@ import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
 import android.provider.Settings
-import android.support.constraint.ConstraintLayout
-import android.support.design.widget.NavigationView
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.material.navigation.NavigationView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var toolbar: Toolbar? = null
     private var navigationView: NavigationView? = null
-    private var drawer: DrawerLayout? = null
+    private var drawer: androidx.drawerlayout.widget.DrawerLayout? = null
     private var progressBar: ProgressBar? = null
     private var mAdView: AdView? = null
     private var overlay: ConstraintLayout? = null
@@ -397,7 +397,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val drawer = findViewById<androidx.drawerlayout.widget.DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         drawer.isSelected = false
         return true

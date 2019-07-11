@@ -14,7 +14,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
